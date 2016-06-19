@@ -1,0 +1,6 @@
+content bbsfox chrome/content/
+
+locale bbsfox en-US chrome/locale/en-US/
+locale bbsfox zh-TW chrome/locale/zh-TW/
+
+skin bbsfox classic/1.0 chrome/skin/default/
