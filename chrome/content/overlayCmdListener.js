@@ -181,6 +181,9 @@ BBSOverlayCmdListener.prototype={
           case "pushThread":
             bbscore.doPushThread();
             break;
+          case "sendPushThreadText":
+            bbscore.sendPushThreadText(data.sendText, data.temp);
+            break;
           case "openThreadUrl":
             bbscore.OpenThreadUrl();
             break;

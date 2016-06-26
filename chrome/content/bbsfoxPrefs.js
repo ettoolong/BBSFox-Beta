@@ -130,7 +130,7 @@ var bbsfoxPrefs = {
     'Escape.string': '^U',
     'TermType': 'VT100',
     'Charset': 'locale',
-    'FontFace.string': 'MingLiU,monospace',//'MingLiU',
+    'FontFace.string': 'MingLiU,Osaka-Mono,monospace',//'MingLiU',
     'FontFaceEn.string': '',
     'PreLoginPrompt': '',
     'LoginPrompt': '',

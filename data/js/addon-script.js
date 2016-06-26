@@ -1,7 +1,7 @@
 // Coding-style-guide
 // https://github.com/mozilla/addon-sdk/wiki/Coding-style-guide
 
-let {components, Cu, Cc, Ci} = require("chrome");
+let {components, Cu, Cc, Ci, Cm, Cr} = require("chrome");
 let {modelFor} = require("sdk/model/core");
 let {viewFor} = require("sdk/view/core");
 
@@ -15,8 +15,14 @@ let sp = require("sdk/simple-prefs");
 let cm = require("sdk/context-menu");
 let _ = require("sdk/l10n").get;
 let system = require("sdk/system");
+let aboutPage;
+
+//let alertsService = Cc["@mozilla.org/alerts-service;1"].getService(Ci.nsIAlertsService);
+let notifications = require("sdk/notifications");
+let soundService = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
 
 let { bbsfoxAPI } = require("./bbsfox-api.js");
+let { BBSFoxAbout } = require("./bbsfox-about.js");
 
 // preferences page - start
 sp.on("openPrefsTab", function() {
@@ -92,8 +98,8 @@ let bbstabs = {
       case "resetStatusBar":
         this.resetStatusBar( message.target );
         break;
-      case "updateOverlayPrefs": {
-        tabUtils.getTabForBrowser( message.target ).overlayPrefs = data.overlayPrefs;
+      case "updateEventPrefs": {
+        tabUtils.getTabForBrowser( message.target ).eventPrefs = data.eventPrefs;
         break;
       }
       case "writePrefs":
@@ -103,7 +109,7 @@ let bbstabs = {
         //tabUtils.getTabForBrowser( message.target ).eventPrefs;
         let tab = tabUtils.getTabForBrowser( message.target );
         if(tab) {
-         delete tab.overlayPrefs;
+         delete tab.eventPrefs;
          delete tab.eventStatus;
         }
         break;
@@ -123,6 +129,15 @@ let bbstabs = {
         break;
       case "openFilepicker":
         this.openFilepicker(data, message.target);
+        break;
+      case "pushThreadDlg":
+        this.pushThreadDlg(data, message.target);
+        break;
+      case "showNotifyMessage":
+        this.showNotifyMessage(data, message.target);
+        break;
+      case "fireNotifySound":
+        this.playNotifySound();
         break;
       default:
         break;
@@ -172,6 +187,62 @@ let bbstabs = {
       let tempURI = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService).newFileURI(filetmp).spec;
       this.openNewTabs([tempURI], null, "UTF-8", true);
       bbstabs.tempFiles.push(filetmp);
+  },
+
+  pushThreadDlg: function(data, target) {
+    let xulTab = tabUtils.getTabForBrowser( target );
+    let chromeWindow = tabUtils.getOwnerWindow(xulTab);
+    let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+
+        var EMURL = "chrome://bbsfox/content/pushThread.xul";
+        var EMFEATURES = "chrome, dialog=yes, resizable=yes, modal=yes, centerscreen";
+        var retVals = { exec: false, pushText: data.pushText, lineLength: data.lineLength};
+        var retVals2 = [];
+        aDOMWindow.openDialog(EMURL, "", EMFEATURES, retVals, retVals2);
+        if(retVals.exec)
+        {
+          this.setBBSCmdEx({command:"sendPushThreadText",
+                            sendText:retVals2,
+                            temp:""
+                          }, target);
+        }
+        else
+        {
+          this.setBBSCmdEx({command:"sendPushThreadText",
+                            temp: retVals.pushText
+                          }, target);
+        }
+  },
+
+  showNotifyMessage: function(data, target){
+    let msg = {
+      iconURL: data.imageUrl,
+      title: data.title,
+      text: data.text,
+      onClick: function () {
+        //console.log(data);
+      }
+    };
+    if(data.textClickable) {
+      msg.onClick =function () {
+        bbstabs.setTabFocus(target);
+        if(data.replyString) {
+          bbstabs.setBBSCmdEx({command:'sendText', text: data.replyString}, target);
+        }
+      }
+    }
+    notifications.notify(msg);
+  },
+
+  playNotifySound: function(){
+    if(soundService) {
+      soundService.beep();
+    }
+  },
+
+  setTabFocus: function(target) {
+    let xulTab = tabUtils.getTabForBrowser( target );
+    tabUtils.activateTab(xulTab, tabUtils.getOwnerWindow(xulTab));
   },
 
   openFilepicker: function(data, target) {
@@ -320,8 +391,8 @@ let bbstabs = {
     }
 
     //console.log(event.target);
-    let overlayPrefs = tab.overlayPrefs;
-    if(!overlayPrefs) {
+    let eventPrefs = tab.eventPrefs;
+    if(!eventPrefs) {
       return;
     }
 
@@ -338,9 +409,9 @@ let bbstabs = {
 
     };
 
-    let mouseWheelFunc = [overlayPrefs.mouseWheelFunc1,
-                          overlayPrefs.mouseWheelFunc2,
-                          overlayPrefs.mouseWheelFunc3]
+    let mouseWheelFunc = [eventPrefs.mouseWheelFunc1,
+                          eventPrefs.mouseWheelFunc2,
+                          eventPrefs.mouseWheelFunc3]
 
     let direction = event.detail < 0 ? 0 :1;
 
@@ -366,7 +437,7 @@ let bbstabs = {
           eventStatus.doDOMMouseScroll = true;
         if(eventStatus.mouseLBtnDown) {
           //TODO: fix this, tell content page skip this mouse click.
-          if(overlayPrefs.useMouseBrowsing) {
+          if(eventPrefs.useMouseBrowsing) {
             this.setBBSCmd("skipMouseClick", browser);
           }
         }
@@ -381,9 +452,6 @@ let bbstabs = {
     }
     let tab = event.target.mCurrentTab; //tabUtils.getTabForBrowser(event.target);
     //let uri = tabUtils.getURI(tab);
-
-    //console.log(tab.overlayPrefs);
-    //console.log(tab);
     this.handle_mouse_scroll({event: event, tab: tab, e10s:true});
   },
 
@@ -391,8 +459,8 @@ let bbstabs = {
     let tab = tabs.activeTab;
     let xulTab = tabUtils.getTabForId(tab.id); //xulTab = viewFor(tab);
 
-    //tabUtils.getTabForBrowser( message.target ).overlayPrefs = data.overlayPrefs;
-    //console.log(xulTab.overlayPrefs);
+    //tabUtils.getTabForBrowser( message.target ).eventPrefs = data.eventPrefs;
+    //console.log(xulTab.eventPrefs);
     this.handle_mouse_scroll({event: event, tab: xulTab, e10s:false});
   },
 
@@ -403,15 +471,15 @@ let bbstabs = {
     if(!this.urlCheck.test(uri))
       return;
 
-    let overlayPrefs = tab.overlayPrefs;
-    if(!overlayPrefs)
+    let eventPrefs = tab.eventPrefs;
+    if(!eventPrefs)
       return;
 
     if(!tab.eventStatus)
       tab.eventStatus = {doDOMMouseScroll: false};
     let eventStatus = tab.eventStatus;
 
-    let mouseWheelFunc2 = (overlayPrefs.mouseWheelFunc2 != 0);
+    let mouseWheelFunc2 = (eventPrefs.mouseWheelFunc2 != 0);
     if(mouseWheelFunc2) {
 
       if(eventStatus.doDOMMouseScroll) {
@@ -463,11 +531,11 @@ let bbstabs = {
     if(!this.urlCheck.test(uri))
       return;
 
-    let overlayPrefs = tab.overlayPrefs;
-    if(!overlayPrefs)
+    let eventPrefs = tab.eventPrefs;
+    if(!eventPrefs)
       return;
 
-    let mouseWheelFunc2 = (overlayPrefs.mouseWheelFunc2 != 0);
+    let mouseWheelFunc2 = (eventPrefs.mouseWheelFunc2 != 0);
     if(mouseWheelFunc2) {
       if(event.button==2) {
         if(this.os == "winnt") {
@@ -492,8 +560,8 @@ let bbstabs = {
     let tab = event.target.mCurrentTab;
     if(!tab) //why tab undefined
       return;
-    let overlayPrefs = tab.overlayPrefs;
-    if(!overlayPrefs)
+    let eventPrefs = tab.eventPrefs;
+    if(!eventPrefs)
       return;
 
     let uri = tabUtils.getURI(tab);
@@ -528,32 +596,32 @@ let bbstabs = {
     //   }
     // }
     if(event.charCode){
-      if(event.ctrlKey && !event.altKey && event.shiftKey && (event.charCode == 118 || event.charCode == 86) && overlayPrefs.hokeyForPaste) { //Shift + ^V, do paste
+      if(event.ctrlKey && !event.altKey && event.shiftKey && (event.charCode == 118 || event.charCode == 86) && eventPrefs.hokeyForPaste) { //Shift + ^V, do paste
         this.setBBSCmd("doPaste", browser);
         event.preventDefault();
         event.stopPropagation();
       }
 
       if (event.ctrlKey && !event.altKey && !event.shiftKey) {
-        if((event.charCode==109 || event.charCode==77) && overlayPrefs.hokeyForMouseBrowsing) {
+        if((event.charCode==109 || event.charCode==77) && eventPrefs.hokeyForMouseBrowsing) {
           this.setBBSCmd("switchMouseBrowsing", browser);
           event.stopPropagation();
           event.preventDefault();
         }
         if(this.os != "darwin") {
-          if((event.charCode==119 || event.charCode==87) && overlayPrefs.hotkeyCtrlW == 1) {
+          if((event.charCode==119 || event.charCode==87) && eventPrefs.hotkeyCtrlW == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:23}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==98 || event.charCode==66) && overlayPrefs.hotkeyCtrlB == 1) {
+          } else if((event.charCode==98 || event.charCode==66) && eventPrefs.hotkeyCtrlB == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:20}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==108 || event.charCode==76) && overlayPrefs.hotkeyCtrlL == 1) {
+          } else if((event.charCode==108 || event.charCode==76) && eventPrefs.hotkeyCtrlL == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:23}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==116 || event.charCode==84) && overlayPrefs.hotkeyCtrlT == 1) {
+          } else if((event.charCode==116 || event.charCode==84) && eventPrefs.hotkeyCtrlT == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:20}, browser);
             event.stopPropagation();
             event.preventDefault();
@@ -611,8 +679,8 @@ let bbstabs = {
     let tabId = tab.id;
     let xulTab = tabUtils.getTabForId(tabId);
     if(this.urlCheck.test(tab.url)) {
-      let overlayPrefs = xulTab.overlayPrefs;
-      if(overlayPrefs) {
+      let eventPrefs = xulTab.eventPrefs;
+      if(eventPrefs) {
         //console.log(event.target);
         let doc = event.target.ownerDocument;
         if(!this.contextLink)
@@ -632,21 +700,21 @@ let bbstabs = {
         this.setItemVisible(doc, "context-viewpartialsource-selection", false);
         this.setItemVisible(doc, "context-viewpartialsource-mathml", false);
 
-        if(overlayPrefs.hideBookMarkLink) {
+        if(eventPrefs.hideBookMarkLink) {
           this.setItemVisible(doc, "context-bookmarklink", false);
         }
-        if(overlayPrefs.hideSendLink) {
+        if(eventPrefs.hideSendLink) {
           this.setItemVisible(doc, "context-sendlink", false);
         }
-        if(overlayPrefs.hideSendPage) {
+        if(eventPrefs.hideSendPage) {
           this.setItemVisible(doc, "context-sendpage", false);
           this.setItemVisible(doc, "context-sharepage", false);
         }
-        if(overlayPrefs.hideViewInfo) {
+        if(eventPrefs.hideViewInfo) {
           this.setItemVisible(doc, "context-sep-viewsource", false);
           this.setItemVisible(doc, "context-viewinfo", false);
         }
-        if(overlayPrefs.hideInspect) {
+        if(eventPrefs.hideInspect) {
           this.setItemVisible(doc, "inspect-separator", false);
           this.setItemVisible(doc, "context-inspect", false);
         }
@@ -737,7 +805,7 @@ let bbstabs = {
 
     let chromeBrowser = chromeWindow.gBrowser; //chromeBrowser undefined????
     if(chromeBrowser) {
-      chromeWindow.ETT_BBSFOX_Overlay = bbsfoxAPI;
+      chromeWindow.BBSFox_API = bbsfoxAPI;
       if(useRemoteTabs)
         chromeWindow.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
       else
@@ -753,7 +821,7 @@ let bbstabs = {
 
       //aDOMWindow.removeEventListener("load", arguments.callee, false);
       //aDOMWindow.gBrowser.tabContainer.addEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
-      aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
+      //aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
 
       aDOMWindow.messageManager.addMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get('handleCoreCommand') );
       let contentAreaContextMenu = aDOMWindow.document.getElementById('contentAreaContextMenu');
@@ -766,13 +834,22 @@ let bbstabs = {
     }
   },
 
+  loadFrameScript: function(chromeWindow) {
+    //Firefox issue: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
+    let chromeBrowser = chromeWindow.gBrowser;
+    if(chromeBrowser) {
+      let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
+      aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
+    }
+  },
+
   onWinClose: function(chromeWindow) {
     let useRemoteTabs = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor)
      .getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsILoadContext).useRemoteTabs;
 
     let chromeBrowser = chromeWindow.gBrowser;
     if(chromeBrowser) {
-      delete chromeWindow.ETT_BBSFOX_Overlay;
+      delete chromeWindow.BBSFox_API;
       if(useRemoteTabs)
         chromeWindow.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
       else
@@ -823,6 +900,7 @@ let bbstabs = {
 };
 
 windows.on("open" , function (win){
+  bbstabs.loadFrameScript( viewFor(win) );
   bbstabs.onWinOpen( viewFor(win) );
 });
 
@@ -1118,6 +1196,9 @@ exports.main = function (options, callbacks) {
   // addon sdk bug :(  see: https://bugzil.la/1196577
   let allWindows = winUtils.windows(null, {includePrivate:true});
   for (let chromeWindow of allWindows) {
+    if (options.loadReason === 'install' || options.loadReason === 'startup') {
+      bbstabs.loadFrameScript( chromeWindow );
+    }
     bbstabs.onWinOpen( chromeWindow );
     // let openedTabs = tabUtils.getTabs( chromeWindow );
     // for(let i=0; i < openedTabs.length; ++i) {
@@ -1142,6 +1223,9 @@ exports.main = function (options, callbacks) {
     //TODO: show version info
     //TODO: update pref value, remove unused pref
   }
+
+  aboutPage = new BBSFoxAbout();
+
 };
 
 exports.onUnload = function (reason) {
@@ -1160,10 +1244,13 @@ exports.onUnload = function (reason) {
     for (let chromeWindow of allWindows) {
       bbstabs.onWinClose( chromeWindow );
     }
+    aboutPage.unregister();
   }
   //cleanup tempFiles.
   //bbstabs.tempFiles
   for(let file of bbstabs.tempFiles) {
     file.remove(true);
   }
+
 };
+

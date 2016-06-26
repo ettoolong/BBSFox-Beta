@@ -463,6 +463,8 @@
 <!ENTITY SHOWALLTAB "[Popup] List all tabs (Preview Mode)">
 <!ENTITY CLOSEDTABSPOPUP "[Popup] Recently Closed Tabs">
 <!ENTITY WEBSEARCHPOPUP "[Popup] Search for Selection with...">
+<!ENTITY ALLSCRIPTSPOPUP "[Popup] All User Scripts">
+<!ENTITY OPENPANELUI "[Popup] Open menu">
 <!ENTITY HYBRIDS "--Hybrid Type--">
 <!ENTITY HYBRIDBOOKMARK "[Hybrid] Bookmark (Link / Frame / Page)">
 <!ENTITY HYBRIDSAVE "[Hybrid] Save As... (Link / Image / Frame / Page)">

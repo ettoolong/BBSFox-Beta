@@ -841,12 +841,6 @@ BBSFox.prototype={
       this.selectStatus = selectStatus;
     },
 
-    test: function(){
-      alert('test');
-    },
-    test2: function(){
-      alert('test2');
-    },
     tabReady: function(cb){
       //this.loadLoginData();
     },
@@ -1849,27 +1843,20 @@ BBSFox.prototype={
     },
 
     doPushThread: function(){
-      if(this.isPTT())
-      {
-        var EMURL = "chrome://bbsfox/content/pushThread.xul";
-        var EMFEATURES = "chrome, dialog=yes, resizable=yes, modal=yes, centerscreen";
-        var retVals = { exec: false, pushText: this.pushTextTemp, lineLength: this.prefs.pushThreadLineLength};
-        var retVals2 = [];
-        window.openDialog(EMURL, "", EMFEATURES, retVals, retVals2);
-        if(retVals.exec)
+      if(this.isPTT()) {
+        this.sendCoreCommand({command: "pushThreadDlg", pushText: this.pushTextTemp, lineLength: this.prefs.pushThreadLineLength});
+      }
+    },
+
+    sendPushThreadText: function(sendText, temp){
+      if(sendText) {
+        for(var i = 0; i < sendText.length; ++i)
         {
-          for(var i =0;i<retVals2.length;++i)
-          {
-            this.conn.convSend(retVals2[i], this.prefs.charset);
-            this.conn.send(this.prefs.EnterChar+'y'+this.prefs.EnterChar);
-          }
-          this.pushTextTemp = '';
-        }
-        else
-        {
-          this.pushTextTemp = retVals.pushText;
+          this.conn.convSend(sendText[i], this.prefs.charset);
+          this.conn.send(this.prefs.EnterChar+'y'+this.prefs.EnterChar);
         }
       }
+      this.pushTextTemp = temp;
     },
 
     OpenThreadUrl: function(){
@@ -1942,12 +1929,5 @@ BBSFox.prototype={
           this.view.BBSROW[i].style.display='inline';
       }
       this.view.update(true);
-    },
-
-    observe: function(subject, topic, data){
-      if(topic == "alertclickcallback")
-      {
-        //TODO:switch to notify tab
-      }
     }
 };

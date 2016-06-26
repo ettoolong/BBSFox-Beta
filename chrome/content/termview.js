@@ -140,10 +140,8 @@ TermView.prototype={
     },
 
     showAlertMessageEx: function(blockByTime, showMsg, playSound, msg){
-      try{
-        if(this.alertWin)
-          this.alertWin.alert(blockByTime, showMsg, playSound, msg);
-      }catch(e){}
+      if(this.alertWin)
+        this.alertWin.alert(blockByTime, showMsg, playSound, msg);
     },
 
     //setBuf: function(buf) {

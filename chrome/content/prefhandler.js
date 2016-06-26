@@ -122,45 +122,6 @@ function bbsfoxPrefHandler(listener) {
       keyEventStatus: true,
       result: true
     };
-    // this.overlayPrefs = {
-    //   hideBookMarkLink: false,
-    //   hideBookMarkPage: false,
-    //   hideSendLink: false,
-    //   hideSendPage: false,
-    //   hideViewInfo: false,
-    //   hideInspect: false,
-    //   embeddedPlayerMenu: false,
-    //   ansiCopyMenu: false,
-    //   delayPasteMenu: false,
-    //   copyHtmlMenu: false,
-    //   screenKeyboardMenu: false,
-    //   ansiColorToolMenu: false,
-    //   openAllLinkMenu: false,
-    //   previewPictureMenu: false,
-    //   easyReadingMenu: false,
-    //   pushThreadMenu: false,
-    //   openThreadUrlMenu: false,
-    //   changeColorTableMenu: false,
-    //   downloadPostMenu: false,
-    //   fileIoMenu: false,
-    //   mouseBrowseMenu: false,
-    //   switchBgDisplayMenu: false,
-    //   blacklistMenu: false,
-    //   keyWordTrackMenu: false,
-    //   enableHighlightWords: false,
-    //   keyWordTrackCaseSensitive: true,
-    //   highlightWords: '',
-    //   //status -start
-    //   haveLink: false,
-    //   screenKeyboardOpened: false,
-    //   ansiColorToolOpened: false,
-    //   enableBackground: false,
-    //   addToBlacklist: false,
-    //   removeFromBlacklist: false,
-    //   tabIcon: "chrome://bbsfox/skin/logo/logo.png",
-    //   //status -end
-    //   result: true
-    // };
 }
 
 bbsfoxPrefHandler.prototype={
@@ -903,28 +864,10 @@ bbsfoxPrefHandler.prototype={
         }
         if(anyChange) {
           //console.log('prefHandler updateEventPrefs');
-          this.listener.sendCoreCommand({command: "updateOverlayPrefs", overlayPrefs: this.eventPrefs});
+          this.listener.sendCoreCommand({command: "updateEventPrefs", eventPrefs: this.eventPrefs});
         }
       }
     },
-    // updateOverlayPrefs: function(dataArray){
-    //   if(this.overlayPrefs.result) {
-    //     var anyChange = false;
-    //     if(dataArray) {
-    //       for(var i=0;i<dataArray.length;++i) {
-    //         if( this.overlayPrefs[ dataArray[i].key ] != dataArray[i].value )
-    //           anyChange = true;
-    //         this.overlayPrefs[ dataArray[i].key ] = dataArray[i].value;
-    //       }
-    //     } else {
-    //       anyChange = true;
-    //     }
-    //     if(anyChange) {
-    //       //console.log('prefHandler updateOverlayPrefs');
-    //       this.listener.sendCoreCommand({command: "updateOverlayPrefs", overlayPrefs: this.overlayPrefs});
-    //     }
-    //   }
-    // },
     addToBlacklist: function(userId){
       if(this.branchName){
         var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);

@@ -881,39 +881,38 @@
               <label control='bbsScript' value='&BBSGESTURES;'/>
               <menulist id='bbsScript' oncommand="checkSelect();">
                 <menupopup>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doPageUp");' label='&KEYPAGEUP;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doPageDown");' label='&KEYPAGEDOWN;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doEnd");' label='&KEYEND;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doHome");' label='&KEYHOME;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doArrowLeft");' label='&KEYLEFT;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doArrowUp");' label='&KEYUP;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doArrowRight");' label='&KEYRIGHT;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doArrowDown");' label='&KEYDOWN;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doCopy");' label='&COPY;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doCopyAnsi");' label='&ANSICOPY;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doPaste");' label='&PASTE;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doDelayPasteText");' label='&DELAYPASTE;' id="DelayPasteGesture" hidden="true"/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doSelectAll");' label='&SELALL;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doOpenAllLink");' label='&OPENALLLINK;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("switchMouseBrowsing");' label='&SWITCHMOUSEBROWSING;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("switchBgDisplay");' label='&SWITCHBGDISPLAY;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("easyReading");' label='&EASYREADING;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("pushThread");' label='&PUSHTHREAD;' id="PushThreadGesture" hidden="true"/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("openThreadUrl");' label='&OPENTHREADURL;' id="OpenThreadUrlGesture" hidden="true"/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("changeColorTable");' label='&CHANGECOLORTABLE;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd({command:"doDownloadPost", downloadColor: 0});' label='&DOWNLOADPOSTTEXT;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd({command:"doDownloadPost", downloadColor: 1});' label='&DOWNLOADPOSTANSI;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd({command:"doDownloadPost", downloadColor: 2});' label='&DOWNLOADPOSTHTML;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("doLoadFile");' label='&LOADFILE;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("switchSymbolInput");' label='&OPENSYMBOLINPUT;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("switchAnsiColorTool");' label='&OPENANSICOLORTOOL;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doPageUp");' label='&KEYPAGEUP;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doPageDown");' label='&KEYPAGEDOWN;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doEnd");' label='&KEYEND;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doHome");' label='&KEYHOME;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doArrowLeft");' label='&KEYLEFT;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doArrowUp");' label='&KEYUP;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doArrowRight");' label='&KEYRIGHT;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doArrowDown");' label='&KEYDOWN;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doCopy");' label='&COPY;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doCopyAnsi");' label='&ANSICOPY;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doPaste");' label='&PASTE;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doDelayPasteText");' label='&DELAYPASTE;' id="DelayPasteGesture" hidden="true"/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doSelectAll");' label='&SELALL;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doOpenAllLink");' label='&OPENALLLINK;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("switchMouseBrowsing");' label='&SWITCHMOUSEBROWSING;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("switchBgDisplay");' label='&SWITCHBGDISPLAY;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("easyReading");' label='&EASYREADING;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("pushThread");' label='&PUSHTHREAD;' id="PushThreadGesture" hidden="true"/>
+                  <menuitem value='BBSFox_API.setBBSCmd("openThreadUrl");' label='&OPENTHREADURL;' id="OpenThreadUrlGesture" hidden="true"/>
+                  <menuitem value='BBSFox_API.setBBSCmd("changeColorTable");' label='&CHANGECOLORTABLE;'/>
+                  <menuitem value='BBSFox_API.setBBSCmdEx({command:"doDownloadPost", downloadColor: 0});' label='&DOWNLOADPOSTTEXT;'/>
+                  <menuitem value='BBSFox_API.setBBSCmdEx({command:"doDownloadPost", downloadColor: 1});' label='&DOWNLOADPOSTANSI;'/>
+                  <menuitem value='BBSFox_API.setBBSCmdEx({command:"doDownloadPost", downloadColor: 2});' label='&DOWNLOADPOSTHTML;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("doLoadFile");' label='&LOADFILE;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("switchSymbolInput");' label='&OPENSYMBOLINPUT;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("switchAnsiColorTool");' label='&OPENANSICOLORTOOL;'/>
                   <menuitem value='OpenEmbeddedPlayer' label='&OPENEP;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("minimizeEmbeddedPlayer");' label='&MINEP;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("minimizeEmbeddedPlayer");' label='&MINEP;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("closeEmbeddedPlayer");' label='&CLOSEEP;'/>
                   <menuitem value='OpenPictureViewer' label='&OPENPV;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("closePictureViewer");' label='&CLOSEPV;'/>
-                  <menuitem value='ETT_BBSFOX_Overlay.setBBSCmd("closeEmbeddedPlayer");' label='&CLOSEEP;'/>
+                  <menuitem value='BBSFox_API.setBBSCmd("closePictureViewer");' label='&CLOSEPV;'/>
                   <menuitem value='SendString' label='&SENDSTR;'/>
-                  <menuitem value='SearchSelString' label='&SEARCHSELSTRING;'/>
                 </menupopup>
               </menulist>
             </hbox>
@@ -966,7 +965,7 @@
                   <menuitem value='FireGestures:CloseOtherTabs' label='&CLOSEOTHERTABS;'/>
                   <menuitem value='FireGestures:CloseLeftTabs' label='&CLOSELEFTTABS;'/>
                   <menuitem value='FireGestures:CloseRightTabs' label='&CLOSERIGHTTABS;'/>
-                  <menuitem value='Browser:ToggleTabView' label='&TOGGLETABVIEW;'/>
+                  <menuitem value='httpcmd:TabView.toggle();' label='&TOGGLETABVIEW;'/>
                   <menuitem label="&PAGES;" disabled="true"/>
                   <menuitem value='cmd_textZoomEnlarge' label='&TEXTZOOMENLARGE;'/>
                   <menuitem value='cmd_textZoomReduce' label='&TEXTZOOMREDUCE;'/>
@@ -1022,13 +1021,13 @@
                   <menuitem label="&POPUPS;" disabled="true"/>
                   <menuitem value='FireGestures:BFHistoryPopup' label='&BFHISTORYPOPUP;'/>
                   <menuitem value='FireGestures:AllTabsPopup' label='&ALLTABSPOPUP;'/>
-                  <menuitem value='Browser:ShowAllTabs' label='&SHOWALLTAB;'/>
                   <menuitem value='FireGestures:ClosedTabsPopup' label='&CLOSEDTABSPOPUP;'/>
                   <menuitem value='FireGestures:WebSearchPopup' label='&WEBSEARCHPOPUP;'/>
+                  <menuitem value='FireGestures:AllScriptsPopup' label='&ALLSCRIPTSPOPUP;'/>
+                  <menuitem value='FireGestures:OpenPanelUI' label='&OPENPANELUI;'/>
                   <menuitem label="&HYBRIDS;" disabled="true"/>
                   <menuitem value='FireGestures:HybridBookmark' label='&HYBRIDBOOKMARK;'/>
                   <menuitem value='FireGestures:HybridSave' label='&HYBRIDSAVE;'/>
-                  <menuitem value='FireGestures:HybridSendURL' label='&HYBRIDSENDURL;'/>
                   <menuitem value='FireGestures:HybridCopyURL' label='&HYBRIDCOPYURL;'/>
                   <menuitem value='FireGestures:HybridViewSource' label='&HYBRIDVIEWSOURCE;'/>
                   <menuitem value='FireGestures:HybridMetaData' label='&HYBRIDPROPERTIES;'/>

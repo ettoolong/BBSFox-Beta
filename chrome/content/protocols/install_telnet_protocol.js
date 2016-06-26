@@ -83,18 +83,20 @@ TelnetProtocol.prototype = {
     return url.QueryInterface(nsIURI);
   },
 
-  newChannel: function(aURI, loadInfo) {
+  newChannel: function(aURI, aSecurity_or_aLoadInfo) {
     // create dummy nsIURI and nsIChannel instances
     let ios = Components.classes[kIOSERVICE_CONTRACTID].getService(nsIIOService);
-    let ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
-    let sp = ssm.getSystemPrincipal();
-    return ios.newChannel2("chrome://bbsfox/content/telnet.html", //aSpec
-                           null, //aOriginCharset
-                           null, //aBaseURI
-                           null, //aLoadingNode
-                           sp, //aLoadingPrincipal
-                           null, //aTriggeringPrincipal
-                           Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-                           Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+    // let ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
+    // let sp = ssm.getSystemPrincipal();
+    // return ios.newChannel2("chrome://bbsfox/content/telnet.html", //aSpec
+    //                        null, //aOriginCharset
+    //                        null, //aBaseURI
+    //                        null, //aLoadingNode
+    //                        sp, //aLoadingPrincipal
+    //                        null, //aTriggeringPrincipal
+    //                        Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+    //                        Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+    let uri = ios.newURI("chrome://bbsfox/content/telnet.html", null, null);
+    return ios.newChannelFromURIWithLoadInfo(uri, aSecurity_or_aLoadInfo);
   }
 };

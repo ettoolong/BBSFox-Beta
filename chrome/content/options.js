@@ -1334,7 +1334,7 @@ function createScript()
   var bbsstr = document.getElementById('bbsScript').selectedItem.label;
   //var resetFocus = document.getElementById('bbsScript').selectedItem.getAttribute("resetFocus");
   //if(resetFocus=='false') {
-  //  cmdstr+='  var eventStatus = ETT_BBSFOX_Overlay.getEventStatus();\r';
+  //  cmdstr+='  var eventStatus = BBSFox_API.getEventStatus();\r';
   //  cmdstr+='  if(eventStatus) eventStatus.resetFocus = false;\r';
   //}
 
@@ -1343,8 +1343,8 @@ function createScript()
     cmdstr+='  var srcNode = FireGestures.sourceNode;\r';
     cmdstr+='  var url = FireGestures.getLinkURL(srcNode);\r';
     cmdstr+='  if(url){\r';
-    cmdstr+='    ETT_BBSFOX_Overlay.setBBSCmd("checkFireGestureKey");\r';
-    cmdstr+='    ETT_BBSFOX_Overlay.setBBSCmdEx({command:"openPlayerWindowEx", videoUrl:url});\r';
+    cmdstr+='    BBSFox_API.setBBSCmd("checkFireGestureKey");\r';
+    cmdstr+='    BBSFox_API.setBBSCmdEx({command:"openPlayerWindowEx", videoUrl:url});\r';
     cmdstr+='  } else {\r';
     cmdstr+='    throw FireGestures._getLocaleString("ERROR_NOT_ON_LINK");\r';
     cmdstr+='  }\r';
@@ -1354,26 +1354,26 @@ function createScript()
     cmdstr+='  var srcNode = FireGestures.sourceNode;\r';
     cmdstr+='  var url = FireGestures.getLinkURL(srcNode);\r';
     cmdstr+='  if(url){\r';
-    cmdstr+='    ETT_BBSFOX_Overlay.setBBSCmd("checkFireGestureKey");\r';
-    cmdstr+='    ETT_BBSFOX_Overlay.setBBSCmdEx({command:"previewPicture", pictureUrl:url});\r';
+    cmdstr+='    BBSFox_API.setBBSCmd("checkFireGestureKey");\r';
+    cmdstr+='    BBSFox_API.setBBSCmdEx({command:"previewPicture", pictureUrl:url});\r';
     cmdstr+='  } else {\r';
     cmdstr+='    throw FireGestures._getLocaleString("ERROR_NOT_ON_LINK");\r';
     cmdstr+='  }\r';
   }
   else if(document.getElementById('bbsScript').value == 'SendString')
   {
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmd("checkFireGestureKey");\r';
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmdEx({command:"sendCodeStr", codeStr:"' + document.getElementById('textedit').value + '"});\r';
+    cmdstr+='  BBSFox_API.setBBSCmd("checkFireGestureKey");\r';
+    cmdstr+='  BBSFox_API.setBBSCmdEx({command:"sendCodeStr", codeStr:"' + document.getElementById('textedit').value + '"});\r';
   }
-  else if(document.getElementById('bbsScript').value == 'SearchSelString')
-  {
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmd("checkFireGestureKey");\r';
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmdEx({command:"sendCodeStrEx", codeStr:"' + document.getElementById('textedit2').value + '"});\r';
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmdEx({command:"sendCodeStrEx", codeStr2:"' + document.getElementById('textedit3').value + '"});\r';
-  }
+  // else if(document.getElementById('bbsScript').value == 'SearchSelString')
+  // {
+  //   cmdstr+='  BBSFox_API.setBBSCmd("checkFireGestureKey");\r';
+  //   cmdstr+='  BBSFox_API.setBBSCmdEx({command:"sendCodeStrEx", codeStr:"' + document.getElementById('textedit2').value + '"});\r';
+  //   cmdstr+='  BBSFox_API.setBBSCmdEx({command:"sendCodeStrEx", codeStr2:"' + document.getElementById('textedit3').value + '"});\r';
+  // }
   else
   {
-    cmdstr+='  ETT_BBSFOX_Overlay.setBBSCmd("checkFireGestureKey");\r';
+    cmdstr+='  BBSFox_API.setBBSCmd("checkFireGestureKey");\r';
     cmdstr+='  ' + document.getElementById('bbsScript').value + '\r';
   }
   var bbsscript0 = document.getElementById('textspan4').value;
@@ -1390,17 +1390,26 @@ function createScript()
   elem = document.getElementById('scriptText');
   elem.value = '//' + scriptCaption+ '\r';
   {
-    scriptData+='if(gBrowser.mCurrentTab.overlayPrefs){\r'; //TODO: need fix this!
+    scriptData+='if(gBrowser.mCurrentTab.eventPrefs){\r'; //TODO: need fix this!
     scriptData+=cmdstr;
     scriptData+='  return;\r';
     scriptData+='}';
   }
-  if(document.getElementById('httpScript').value!='')
+
+  let httpCmd = document.getElementById('httpScript').value;
+  if(httpCmd != '')
   {
-    scriptData+='\r';
-    scriptData+='FireGestures._performAction(event, "';
-    scriptData+=document.getElementById('httpScript').value;
-    scriptData+='");';
+    if(/^httpcmd:/.test(httpCmd)) {
+      let cmd = /^httpcmd:(.*)/.exec(httpCmd);
+      cmd = cmd[1];
+      scriptData+='\r';
+      scriptData+=cmd;
+    } else {
+      scriptData+='\r';
+      scriptData+='FireGestures._performAction(event, "';
+      scriptData+=httpCmd;
+      scriptData+='");';
+    }
   }
   elem = document.getElementById('scriptText');
   elem.value = elem.value + scriptData;
