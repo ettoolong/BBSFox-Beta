@@ -115,6 +115,10 @@ let bbstabs = {
         break;
       }
       case "frameScriptReady": {
+        let xulTab = tabUtils.getTabForBrowser(message.target);
+        if(xulTab.selected)
+          bbstabs.setBBSCmd("setTabSelect", message.target );
+
         //console.log("handleCoreCommand: frameScriptReady");
         // //sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayEvent", {});
         // let id = tabUtils.getTabId(tabUtils.getTabForBrowser( message.target ));
@@ -396,8 +400,9 @@ let bbstabs = {
       return;
     }
 
-    if(!tab.eventStatus)
+    if(!tab.eventStatus) {
       tab.eventStatus = {doDOMMouseScroll: false};
+    }
     let browser = e10s ? event.target.mCurrentBrowser : null;
 
     let actions = [["",""],
@@ -433,8 +438,9 @@ let bbstabs = {
         event.stopPropagation();
         event.preventDefault();
 
-        if(eventStatus.mouseRBtnDown) //prevent context menu popup
+        if(eventStatus.mouseRBtnDown) {//prevent context menu popup
           eventStatus.doDOMMouseScroll = true;
+        }
         if(eventStatus.mouseLBtnDown) {
           //TODO: fix this, tell content page skip this mouse click.
           if(eventPrefs.useMouseBrowsing) {
@@ -466,18 +472,20 @@ let bbstabs = {
 
   mouse_menu: function (event) {
 
-    let tab = event.target.mCurrentTab;
-    let uri = tabUtils.getURI(tab);
+    let tab = tabs.activeTab;
+    let xulTab = tabUtils.getTabForId(tab.id);
+    //let tab = event.target.mCurrentTab;
+    let uri = tabUtils.getURI(xulTab);
     if(!this.urlCheck.test(uri))
       return;
 
-    let eventPrefs = tab.eventPrefs;
+    let eventPrefs = xulTab.eventPrefs;
     if(!eventPrefs)
       return;
 
-    if(!tab.eventStatus)
-      tab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = tab.eventStatus;
+    if(!xulTab.eventStatus)
+      xulTab.eventStatus = {doDOMMouseScroll: false};
+    let eventStatus = xulTab.eventStatus;
 
     let mouseWheelFunc2 = (eventPrefs.mouseWheelFunc2 != 0);
     if(mouseWheelFunc2) {
@@ -500,12 +508,15 @@ let bbstabs = {
   },
 
   mouse_down: function (event) {
-    if(event.target.tagName !== "tabbrowser")
-      return;
-    let tab = event.target.mCurrentTab;//TODO: check tab == undefined
-    if(!tab.eventStatus)
-      tab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = tab.eventStatus;
+    //if(event.target.tagName !== "tabbrowser")
+    //  return;
+    //let tab = event.target.mCurrentTab;
+    let tab = tabs.activeTab;
+    let xulTab = tabUtils.getTabForId(tab.id);
+
+    if(!xulTab.eventStatus)
+      xulTab.eventStatus = {doDOMMouseScroll: false};
+    let eventStatus = xulTab.eventStatus;
     if(event.button==2) {
       eventStatus.mouseRBtnDown = true;
       eventStatus.doDOMMouseScroll = false;
@@ -515,23 +526,26 @@ let bbstabs = {
   },
 
   mouse_up: function (event) {
-    if(event.target.tagName !== "tabbrowser")
-      return;
-    let tab = event.target.mCurrentTab;//TODO: check tab == undefined
-    if(!tab.eventStatus)
-      tab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = tab.eventStatus;
+    //if(event.target.tagName !== "tabbrowser")
+    //  return;
+    //let tab = event.target.mCurrentTab;
+
+    let tab = tabs.activeTab;
+    let xulTab = tabUtils.getTabForId(tab.id);
+    if(!xulTab.eventStatus)
+      xulTab.eventStatus = {doDOMMouseScroll: false};
+    let eventStatus = xulTab.eventStatus;
 
     if(event.button==2)
       eventStatus.mouseRBtnDown = false;
     else if(event.button==0)
       eventStatus.mouseLBtnDown = false;
 
-    let uri = tabUtils.getURI(tab);
+    let uri = tabUtils.getURI(xulTab);
     if(!this.urlCheck.test(uri))
       return;
 
-    let eventPrefs = tab.eventPrefs;
+    let eventPrefs = xulTab.eventPrefs;
     if(!eventPrefs)
       return;
 
@@ -769,7 +783,7 @@ let bbstabs = {
   },
 
   tabAttrModified: function(event) {
-    let tabId = tabUtils.getTabId(event.target);
+    //let tabId = tabUtils.getTabId(event.target);
     let tabBrowser = tabUtils.getBrowserForTab(event.target);
     let browserMM = tabBrowser.messageManager;
     browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayEvent", {command:"update"});
@@ -809,7 +823,7 @@ let bbstabs = {
       if(useRemoteTabs)
         chromeWindow.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
       else
-        chromeBrowser.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
+        chromeWindow.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
 
       chromeBrowser.addEventListener("contextmenu", this.eventMap.get('contextmenu'), true);
       chromeBrowser.addEventListener("mousedown", this.eventMap.get('mousedown'), true);
@@ -818,12 +832,9 @@ let bbstabs = {
       chromeBrowser.tabContainer.addEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
 
       let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-
-      //aDOMWindow.removeEventListener("load", arguments.callee, false);
-      //aDOMWindow.gBrowser.tabContainer.addEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
-      //aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
-
+      aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
       aDOMWindow.messageManager.addMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get('handleCoreCommand') );
+
       let contentAreaContextMenu = aDOMWindow.document.getElementById('contentAreaContextMenu');
 
       if(contentAreaContextMenu) {
@@ -831,15 +842,6 @@ let bbstabs = {
         contentAreaContextMenu.addEventListener('popupshown', this.eventMap.get('caContextMenu-ps2'), false);
         contentAreaContextMenu.addEventListener('popuphidden', this.eventMap.get('caContextMenu-ph'), false);
       }
-    }
-  },
-
-  loadFrameScript: function(chromeWindow) {
-    //Firefox issue: https://bugzilla.mozilla.org/show_bug.cgi?id=1051238
-    let chromeBrowser = chromeWindow.gBrowser;
-    if(chromeBrowser) {
-      let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-      aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
     }
   },
 
@@ -853,7 +855,7 @@ let bbstabs = {
       if(useRemoteTabs)
         chromeWindow.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
       else
-        chromeBrowser.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
+        chromeWindow.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
 
       chromeBrowser.removeEventListener("contextmenu", this.eventMap.get('contextmenu'), true);
       chromeBrowser.removeEventListener("mousedown", this.eventMap.get('mousedown'), true);
@@ -862,10 +864,9 @@ let bbstabs = {
       chromeBrowser.tabContainer.removeEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
 
       let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-
-      //aDOMWindow.removeEventListener("load", arguments.callee, false);
-      //aDOMWindow.gBrowser.tabContainer.removeEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
       aDOMWindow.messageManager.removeMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get('handleCoreCommand') );
+      aDOMWindow.messageManager.removeDelayedFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js");
+
       let contentAreaContextMenu = aDOMWindow.document.getElementById('contentAreaContextMenu');
 
       if(contentAreaContextMenu) {
@@ -874,6 +875,17 @@ let bbstabs = {
         contentAreaContextMenu.removeEventListener('popuphidden', this.eventMap.get('caContextMenu-ph'), false);
       }
     }
+  },
+
+  onTabOpen: function(tab) {
+    tab.on("activate", tab => {
+      Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster)
+        .broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", {command: "setTabUnselect"});
+      let tabId = tab.id;
+      let xulTab = tabUtils.getTabForId(tabId);
+      let tabBrowser = tabUtils.getBrowserForTab(xulTab);
+      bbstabs.setBBSCmd("setTabSelect", tabBrowser );
+    });
   },
 
   getContentScript: function(prefName, command) {
@@ -900,8 +912,11 @@ let bbstabs = {
 };
 
 windows.on("open" , function (win){
-  bbstabs.loadFrameScript( viewFor(win) );
   bbstabs.onWinOpen( viewFor(win) );
+});
+
+tabs.on('open', tab => {
+  bbstabs.onTabOpen(tab);
 });
 
 //context-menu-item-ansiCopy
@@ -1192,33 +1207,22 @@ exports.main = function (options, callbacks) {
   // Init event listener - start
   // 1. Listen open event that windows open before addon startup
   // 2. Listen open event that tabs open before addon startup
-
   // addon sdk bug :(  see: https://bugzil.la/1196577
   let allWindows = winUtils.windows(null, {includePrivate:true});
   for (let chromeWindow of allWindows) {
-    if (options.loadReason === 'install' || options.loadReason === 'startup') {
-      bbstabs.loadFrameScript( chromeWindow );
+    if(winUtils.isBrowser(chromeWindow)) {
+      bbstabs.onWinOpen( chromeWindow );
+      let openedTabs = tabUtils.getTabs( chromeWindow );
+      for(let openedTab of openedTabs) {
+        //console.log(openedTabs[i]);
+        bbstabs.onTabOpen( modelFor(openedTab) );
+      }
     }
-    bbstabs.onWinOpen( chromeWindow );
-    // let openedTabs = tabUtils.getTabs( chromeWindow );
-    // for(let i=0; i < openedTabs.length; ++i) {
-    //   //console.log(openedTabs[i]);
-    //   bbstabs.onTabOpen( modelFor(openedTabs[i]) );
-    // }
   }
-
   // Init event listener - end
 
-  // Load global frame-script for all page - start
-  Cc["@mozilla.org/globalmessagemanager;1"]
-    .getService(Ci.nsIMessageListenerManager)
-    .loadFrameScript( data.url("js/frame-script.js"), true);
-  // Load global frame-script for all page - end
   if (options.loadReason === 'install' || options.loadReason === 'startup') {
     //TODO: set default pref value
-    // Cc["@mozilla.org/globalmessagemanager;1"]
-    //   .getService(Ci.nsIMessageListenerManager)
-    //   .loadFrameScript( data.url("js/frame-script.js"), true);
   } else if (options.loadReason === 'upgrade') {
     //TODO: show version info
     //TODO: update pref value, remove unused pref
@@ -1226,31 +1230,45 @@ exports.main = function (options, callbacks) {
 
   aboutPage = new BBSFoxAbout();
 
+  Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster)
+    .broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-addonCommand", {command: options.loadReason});
 };
 
 exports.onUnload = function (reason) {
-  // TODO:
-  // 1. Remove all window/tab event listener
-  // 2. Disconnect all opened telnet/ssh tab
-  // 3. Unload global frame-script
-
-  // try to send message to global frame-script.
-  //Cc["@mozilla.org/globalmessagemanager;1"].
-  //  getService(Ci.nsIMessageListenerManager).
-  //  broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-globalCommand", {command: "unregisterProtocol"});
-
   if (reason !== "shutdown"){
+
+    // remove all event listener - start
     let allWindows = winUtils.windows(null, {includePrivate:true});
     for (let chromeWindow of allWindows) {
-      bbstabs.onWinClose( chromeWindow );
+      if(winUtils.isBrowser(chromeWindow)) {
+        bbstabs.onWinClose( chromeWindow );
+      }
     }
+    // remove all event listener - end
+
+    // unregister about:bbsfox page
     aboutPage.unregister();
+
+    // notify all telnet page
+    Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster)
+      .broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-addonCommand", {command: reason});
+
+    // close preference dialog - start
+    let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
+    let ww = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
+    let existing = wm.getMostRecentWindow("bbsfox:options");
+    if (existing){
+      try{
+        existing.close();
+      }
+      catch (e) {}
+    }
+    // close preference dialog - end
   }
-  //cleanup tempFiles.
-  //bbstabs.tempFiles
+
+  // cleanup tempFiles - start
   for(let file of bbstabs.tempFiles) {
     file.remove(true);
   }
-
+  // cleanup tempFiles - end
 };
-

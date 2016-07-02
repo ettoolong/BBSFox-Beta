@@ -2,15 +2,13 @@
 // https://developer.mozilla.org/en-US/Add-ons/Working_with_multiprocess_Firefox
 
 //console.log('global frame-script.js');
+const { utils: Cu, classes: Cc, interfaces: Ci, manager: Cm, results: Cr } = Components;
 
-var regTelnet = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
+var regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
              .isContractIDRegistered('@mozilla.org/network/protocol;1?name=telnet') ? false : true;
 
-var regSsh = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
+var regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
              .isContractIDRegistered('@mozilla.org/network/protocol;1?name=ssh') ? false : true;
-
-// var regAbout = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar)
-//              .isContractIDRegistered('@mozilla.org/network/protocol/about;1?what=bbsfox') ? false : true;
 
 function setProtocol( enable ) {
 
@@ -18,10 +16,10 @@ function setProtocol( enable ) {
       // Register/unregister a constructor as a component.
       let Factory = {
         QueryInterface: function QueryInterface(iid){
-          if (iid.equals(Components.interfaces.nsIFactory))
+          if (iid.equals(Ci.nsIFactory))
             return this;
           else
-            throw Components.results.NS_ERROR_NO_INTERFACE;
+            throw Cr.NS_ERROR_NO_INTERFACE;
         },
 
         _targetConstructor: null,
@@ -29,7 +27,7 @@ function setProtocol( enable ) {
         register: function register(targetConstructor) {
           this._targetConstructor = targetConstructor;
           var proto = targetConstructor.prototype;
-          var registrar = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+          var registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
           if(registrar.isContractIDRegistered(proto.contractID) ) {
 
           } else {
@@ -39,7 +37,7 @@ function setProtocol( enable ) {
 
         unregister: function unregister() {
           var proto = this._targetConstructor.prototype;
-          var registrar = Components.manager.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+          var registrar = Cm.QueryInterface(Components.interfaces.nsIComponentRegistrar);
           registrar.unregisterFactory(proto.classID, this);
           this._targetConstructor = null;
         },
@@ -47,39 +45,34 @@ function setProtocol( enable ) {
         // nsIFactory
         createInstance: function createInstance(aOuter, iid) {
           if (aOuter !== null)
-            throw Components.results.NS_ERROR_NO_AGGREGATION;
+            throw Cr.NS_ERROR_NO_AGGREGATION;
           return (new (this._targetConstructor)).QueryInterface(iid);
         },
 
         // nsIFactory
         lockFactory: function lockFactory(lock) {
           // No longer used as of gecko 1.7.
-          throw Components.results.NS_ERROR_NOT_IMPLEMENTED;
+          throw Cr.NS_ERROR_NOT_IMPLEMENTED;
         }
       };
       return Factory;
   };
 
   if(enable) {
-    Components.utils.import("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
+    Cu.import("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
     createFactory().register(TelnetProtocol);
 
-    Components.utils.import("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
+    Cu.import("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
     createFactory().register(SshProtocol);
   } else {
     //how to unregister protocol?
   }
 
-//   if(regAbout) {
-//     Components.utils.import("resource://bbsfox/install_about_page.js");
-//     createFactory().register(BBSFoxAboutPage);
-//   }
-
   {
     //TODO: need fix, if bbsfoxBg directory not exists!
-    Components.utils.import("resource://gre/modules/osfile.jsm");
-    let ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-    let resource = ios.getProtocolHandler("resource").QueryInterface(Components.interfaces.nsIResProtocolHandler);
+    Cu.import("resource://gre/modules/osfile.jsm");
+    let ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+    let resource = ios.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
     let dir = OS.Path.join(OS.Constants.Path.profileDir, 'bbsfoxBg');
     try{
       OS.File.makeDir(dir);

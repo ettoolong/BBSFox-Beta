@@ -12,6 +12,38 @@ addMessageListener('bbsfox@ettoolong:bbsfox-overlayCommand',
   }
 );
 
+addMessageListener('bbsfox@ettoolong:bbsfox-addonCommand',
+  function(message) {
+    //console.log(message.data.command);
+    var doRefreshTabs = function(doc, close) {
+      var loc = doc.location;
+      var protocol = loc.protocol.toLowerCase();
+      if (protocol == 'telnet:' || protocol == 'ssh:') {
+        // Disconnect page.
+      } else if(loc.href == 'about:bbsfox'){
+        content.close();
+      }
+    };
+    if(content) {
+      switch (message.data.command) {
+        case "disable":
+        case "uninstall":
+          doRefreshTabs(content.document, true);
+          break;
+        case "startup":
+        case "enable":
+        case "install":
+        case "upgrade":
+        case "downgrade":
+          doRefreshTabs(content.document, false);
+          break;
+        default:
+          break;
+      }
+    }
+  }
+);
+
 var init = function() {
   if(content) {
     var bbscore = content.bbsfox;

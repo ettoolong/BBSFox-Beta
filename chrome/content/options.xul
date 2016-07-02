@@ -1109,7 +1109,6 @@
       <button id="btnBackup" label="&options_backup.label;" oncommand="backup();"/>
       <button id="btnRecover" label="&options_recover.label;" oncommand="recover();"/>
       <spacer flex="1" />
-      <button label="&options_help.label;" oncommand="openURL('chrome://bbsfox/locale/help.htm');"/>
       <button label="&options_apply.label;" oncommand="save();"/>
       <button label="&options_default.label;" oncommand="onSetDefaultClick();"/>
     </hbox>
