@@ -1,10 +1,10 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
-  return unsafeWindow.bbsfox.prefs.ansiColorToolMenu && !unsafeWindow.bbsfox.prefs.status.ansiColorToolOpened;
+  return window.bbsfox.prefs.ansiColorToolMenu && !window.bbsfox.prefs.status.ansiColorToolOpened;
 });
 
 self.on("click", function(node, data) {
-  unsafeWindow.bbsfox.overlaycmd.exec({command:"openAnsiColorTool"});
+  window.bbsfox.overlaycmd.exec({command:"openAnsiColorTool"});
 });

@@ -3,13 +3,13 @@
 var uriColor='#FF6600'; // color used to draw URI underline
 
 function setTimer(repeat, func, timelimit) {
-    var timer = Components.classes["@mozilla.org/timer;1"]
-                  .createInstance(Components.interfaces.nsITimer);
+    var timer = Cc["@mozilla.org/timer;1"]
+                  .createInstance(Ci.nsITimer);
     timer.initWithCallback(
         { notify: function(timer) { func(); } },
         timelimit,
-        repeat  ? Components.interfaces.nsITimer.TYPE_REPEATING_SLACK
-                : Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+        repeat  ? Ci.nsITimer.TYPE_REPEATING_SLACK
+                : Ci.nsITimer.TYPE_ONE_SHOT);
     return timer;
 }
 
@@ -35,6 +35,9 @@ function TermView(colCount, rowCount) {
     this.input.setAttribute('BBSFoxInput', '0');
     this.input.setAttribute('BBSInputText', '');
     //this.wordtest = document.getElementById('BBSFoxFontTest');
+    this.spaceCharacterElem = document.getElementById('SpaceCharacterTest');
+    this.nbspCharacterElem = document.getElementById('NbspCharacterTest');
+    this.spaceCharacter = '&nbsp;';
     this.symtable = window.symboltable;
     this.bbsCursor = document.getElementById('cursor');
     this.trackKeyWordList = document.getElementById('TrackKeyWordList');
@@ -59,9 +62,7 @@ function TermView(colCount, rowCount) {
     this.compositionStart = false;
     this.dp = new DOMParser();
 
-    this.os = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULRuntime).OS;
-    var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
-    this.FXVersion = parseFloat(appInfo.version);
+    this.os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 
     this.BBSROW = new Array(rowCount);
     for(var i=0;i<rowCount;++i) {
@@ -72,7 +73,6 @@ function TermView(colCount, rowCount) {
       //this.BBSROW[i]=document.getElementById("row_"+i);
     }
     this.firstGrid = document.getElementById('row_0');
-    //this.findBar = null; //TODO: re-impl by termbuf
 
     this.input.addEventListener('compositionstart', this.composition_start.bind(this), false);
     this.input.addEventListener('compositionend', this.composition_end.bind(this), false);
@@ -90,7 +90,7 @@ function TermView(colCount, rowCount) {
     var tmp = [];
     tmp[0] = '<spen class="s">';
     for(var col=1; col<=colCount; ++col) {
-      tmp[col] = '<span style="color:#FFFFFF;background-color:#000000;">\u0020</span>';
+      tmp[col] = '<span style="color:#FFFFFF;background-color:#000000;">'+this.spaceCharacter+'</span>';
     }
     tmp[colCount+1] = '<br></spen>';
     for (var row=0; row < rowCount; ++row)
@@ -157,18 +157,6 @@ TermView.prototype={
         this.conn = conn;
         this.buf = buf;
         this.prefs = core.prefs;
-        /*
-        //TODO: re-impl by termbuf
-        var rw = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-        var browserIndex = rw.gBrowser.getBrowserIndexForDocument(document);
-
-        if (browserIndex > -1) {
-          if(rw.gFindBar && rw.gFindBar._highlightDoc)
-            this.findBar = rw.gFindBar;
-          else
-            this.findBar = null;
-        }
-        */
         this.alertWin = new AlertService(core, this, buf, conn);
     },
 
@@ -214,7 +202,7 @@ TermView.prototype={
           var tmp = [];
           tmp[0] = '<spen class="s">';
           for(var col=1; col<=cols; ++col)
-            tmp[col] = '<span style="color:#FFFFFF;background-color:#000000;">\u0020</span>';
+            tmp[col] = '<span style="color:#FFFFFF;background-color:#000000;">'+this.spaceCharacter+'</span>';
           tmp[cols+1] = '</spen>';
           var doc = this.dp.parseFromString(tmp.join(''), "text/html");
           if(newEle.firstChild)
@@ -410,9 +398,9 @@ TermView.prototype={
       if(bg==defbg && (fg == deffg || char1 <= ' ') && !ch.isBlink() )
       {
         if(char1 <= ' ') // only display visible chars to speed up
-          return s0+'\u0020'+s2;//return ' ';
+          return s0+this.spaceCharacter+s2;//return ' ';
         else if(char1 == '\x80') // 128, display ' ' or '?'
-          return s0+'\u0020'+s2;
+          return s0+this.spaceCharacter+s2;
         else if(char1 == '\x3c')
           return s0+'&lt;'+s2;
         else if(char1 == '\x3e')
@@ -426,9 +414,9 @@ TermView.prototype={
       {
         s1 +='<span '+ (ch.isPartOfURL()?'link="true" ':'') +'class="q' +fg+ ' b' +bg+ '">'+ (ch.isBlink()?'<x s="q'+fg+' b'+bg+'" h="qq'+bg+'"></x>':'');
         if(char1 <= ' ') // only display visible chars to speed up
-          s1 += '\u0020';
+          s1 += this.spaceCharacter;
         else if(char1 == '\x80') // 128, display ' ' or '?'
-          s1 += '\u0020';
+          s1 += this.spaceCharacter;
         else
           s1 += char1;
         s1 += '</span>';
@@ -671,9 +659,9 @@ TermView.prototype={
               //
               if(this.prefs.loadURLInBG){
                 var allLinks = doc.getElementsByTagName('a');
-                for(var k=0;k<allLinks.length;++k) {
-                  if(!allLinks[k].getAttribute('aidc')) {
-                    allLinks[k].addEventListener('click', this.anchorClickHandler, true);
+                for(let link of allLinks) {
+                  if(!link.getAttribute('aidc')) {
+                    link.addEventListener('click', this.anchorClickHandler, true);
                   }
                 }
               }
@@ -722,11 +710,11 @@ TermView.prototype={
           if(this.timerTrackKeyWord)
             this.timerTrackKeyWord.cancel();
           this.timerTrackKeyWord = setTimer(false, function(){
-            for(var i=0; i < highlightWords.length; ++i){
-              this.highlighter.highlight(highlightWords[i], this.prefs.keyWordTrackCaseSensitive);
+            for(let highlightWord of highlightWords){
+              this.highlighter.highlight(highlightWord, this.prefs.keyWordTrackCaseSensitive);
             }
-            for(var i=0; i < highlightWords_local.length; ++i){
-              this.highlighter.highlight(highlightWords_local[i], this.prefs.keyWordTrackCaseSensitive);
+            for(let highlightWord_local of highlightWords_local){
+              this.highlighter.highlight(highlightWord_local, this.prefs.keyWordTrackCaseSensitive);
             }
           }.bind(this), 1);
         }
@@ -1368,6 +1356,16 @@ TermView.prototype={
       this.setColorDefine();
     },
 
+    setSpaceCharacter: function(){
+      this.spaceCharacterElem.style.fontSize = '64px';
+      this.nbspCharacterElem.style.fontSize = '64px';
+      var spaceCharacter = this.spaceCharacterElem.offsetWidth == this.nbspCharacterElem.offsetWidth ? '&nbsp;' : '\u0020';
+      if(this.spaceCharacter != spaceCharacter) {
+        this.spaceCharacter = spaceCharacter;
+        this.update(true);
+      }
+    },
+
     cancelHighlightTimeout: function() {
       if(this.highlightTimeout)
       {
@@ -1386,16 +1384,4 @@ TermView.prototype={
       if(this.prefs.mouseBrowsingHlTime)
         this.highlightTimeout = setTimer(false, func, this.prefs.mouseBrowsingHlTime);
     }
-    /*
-    myTimer: function(repeat, func_obj, timelimit) {
-      var timer = Components.classes["@mozilla.org/timer;1"]
-                      .createInstance(Components.interfaces.nsITimer);
-      timer.initWithCallback(
-         { notify: function(timer) { func_obj(); } },
-         timelimit,
-         repeat  ? Components.interfaces.nsITimer.TYPE_REPEATING_SLACK
-                 : Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-      return timer;
-    }
-    */
 };

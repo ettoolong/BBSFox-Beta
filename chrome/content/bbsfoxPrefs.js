@@ -81,6 +81,7 @@ var bbsfoxPrefs = {
     'EnableBlacklist': false,
     'BlacklistMenu': false,
     'AnsiColorToolMenu': true,
+    'EnableNotification': true,
 
     'ScreenType': 0,
     'HighlightBG': 2,
@@ -165,10 +166,7 @@ var bbsfoxPrefs = {
     'bbsfox2.DevVersion': false,
     'bbsfox1.SshSupport': false,
     'bbsfox1.RefererRule': true,
-    'bbsfox2.ShowVersionHistory': true,
-    'bbsfox2.locale': 'chrome://bbsfox/locale/bbsfox.properties',
-    'bbsfox2.Version': '1.0.0',
-    'bbsfox3.conflictAddons': ''
+    'bbsfox2.locale': 'chrome://bbsfox/locale/bbsfox.properties'
   }
 };
 

@@ -35,25 +35,25 @@
  * the terms of any one of the MPL, the GPL or the LGPL.
  *
  * ***** END LICENSE BLOCK ***** */
-
+const {classes: Cc, interfaces: Ci, results: Cr, ID: Cid } = Components;
 var EXPORTED_SYMBOLS = ["TelnetProtocol"];
 
 // Telnet protocol related
 const kSCHEME              = "telnet";
 const kPROTOCOL_NAME       = "Telnet Protocol";
 const kPROTOCOL_CONTRACTID = "@mozilla.org/network/protocol;1?name=" + kSCHEME;
-const kPROTOCOL_CID        = Components.ID("5FAF83FD-708D-45c0-988B-C7404FB25376");
+const kPROTOCOL_CID        = Cid("5FAF83FD-708D-45c0-988B-C7404FB25376");
 
 // Mozilla defined
 const kSTANDARDURL_CONTRACTID = "@mozilla.org/network/standard-url;1";
 const kIOSERVICE_CONTRACTID   = "@mozilla.org/network/io-service;1";
 
-const nsISupports        = Components.interfaces.nsISupports;
-const nsIObserver        = Components.interfaces.nsIObserver;
-const nsIIOService       = Components.interfaces.nsIIOService;
-const nsIProtocolHandler = Components.interfaces.nsIProtocolHandler;
-const nsIStandardURL     = Components.interfaces.nsIStandardURL;
-const nsIURI             = Components.interfaces.nsIURI;
+const nsISupports        = Ci.nsISupports;
+const nsIObserver        = Ci.nsIObserver;
+const nsIIOService       = Ci.nsIIOService;
+const nsIProtocolHandler = Ci.nsIProtocolHandler;
+const nsIStandardURL     = Ci.nsIStandardURL;
+const nsIURI             = Ci.nsIURI;
 
 function TelnetProtocol() {}
 
@@ -62,10 +62,10 @@ TelnetProtocol.prototype = {
   classID:          kPROTOCOL_CID,
   contractID:       kPROTOCOL_CONTRACTID,
   QueryInterface: function QueryInterface(iid){
-    if (iid.equals(Components.interfaces.nsIProtocolHandler))
+    if (iid.equals(Ci.nsIProtocolHandler))
       return this;
     else
-      throw Components.results.NS_ERROR_NO_INTERFACE;
+      throw Cr.NS_ERROR_NO_INTERFACE;
   },
   scheme: kSCHEME,
   protocolFlags: nsIProtocolHandler.URI_NORELATIVE |
@@ -77,7 +77,7 @@ TelnetProtocol.prototype = {
   },
 
   newURI: function(spec, charset, baseURI) {
-    let cls = Components.classes[kSTANDARDURL_CONTRACTID];
+    let cls = Cc[kSTANDARDURL_CONTRACTID];
     let url = cls.createInstance(nsIStandardURL);
     url.init(nsIStandardURL.URLTYPE_AUTHORITY, 23, spec, charset, baseURI);
     return url.QueryInterface(nsIURI);
@@ -85,17 +85,7 @@ TelnetProtocol.prototype = {
 
   newChannel: function(aURI, aSecurity_or_aLoadInfo) {
     // create dummy nsIURI and nsIChannel instances
-    let ios = Components.classes[kIOSERVICE_CONTRACTID].getService(nsIIOService);
-    // let ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
-    // let sp = ssm.getSystemPrincipal();
-    // return ios.newChannel2("chrome://bbsfox/content/telnet.html", //aSpec
-    //                        null, //aOriginCharset
-    //                        null, //aBaseURI
-    //                        null, //aLoadingNode
-    //                        sp, //aLoadingPrincipal
-    //                        null, //aTriggeringPrincipal
-    //                        Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-    //                        Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+    let ios = Cc[kIOSERVICE_CONTRACTID].getService(nsIIOService);
     let uri = ios.newURI("chrome://bbsfox/content/telnet.html", null, null);
     return ios.newChannelFromURIWithLoadInfo(uri, aSecurity_or_aLoadInfo);
   }

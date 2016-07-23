@@ -275,6 +275,7 @@
 <!ENTITY options_needGrowl1.label "To use this function, You need install">
 <!ENTITY options_needGrowl2.label "Growl">
 <!ENTITY options_needGrowl3.label "">
+<!ENTITY options_enablenotification.label "Enable Notification">
 <!ENTITY options_notifywhenbackground.label "Notify when not at current page">
 <!ENTITY options_notifybysound.label "Notify by sound">
 <!ENTITY options_notifybymessage.label "Notify by message">

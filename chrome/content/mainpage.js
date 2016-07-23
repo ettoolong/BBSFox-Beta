@@ -1,7 +1,6 @@
-//this javascript file ONLY for telnet.htm. Because we remove all inline javascript code from 'telnet.htm'.
+//this javascript file ONLY for telnet.htm. Because we remove all inline javascript code from 'telnet.htm' and 'ssh.htm'.
+const { utils: Cu, classes: Cc, interfaces: Ci } = Components;
 var bbsfox;
-
-const BBSFOX_DEFAULT_PORT = 23;
 
 function startup() {
   document.title = document.location.host;
@@ -26,9 +25,11 @@ function startup() {
 
 function release() {
   //document.getElementById('t').disabled="disabled";
-  bbsfox.prefListener.unregister();
-  bbsfox.close();
-  bbsfox=null;
+  if(bbsfox) {
+    bbsfox.prefListener.unregister();
+    bbsfox.close();
+    bbsfox=null;
+  }
   window.removeEventListener('load', startup, true);
   window.removeEventListener('unload', release, true);
   window.removeEventListener('resize', resize, false);

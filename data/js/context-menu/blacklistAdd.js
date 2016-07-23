@@ -1,13 +1,13 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
   //TODO: bbsfox.buf.PageState always == 0, if mouse browsering == false
-  let bbsfox = unsafeWindow.bbsfox;
+  let bbsfox = window.bbsfox;
   let prefs = bbsfox.prefs;
-  if(!unsafeWindow.getSelection().isCollapsed && prefs.enableBlacklist && prefs.blacklistMenu) {
+  if(!window.getSelection().isCollapsed && prefs.enableBlacklist && prefs.blacklistMenu) {
     //check blacklist id
-    let selstr = unsafeWindow.getSelection().toString().toLowerCase();
+    let selstr = window.getSelection().toString().toLowerCase();
     if(selstr && selstr.indexOf('\n') == -1) {
       selstr = selstr.replace(/^\s+|\s+$/g,'');
       let userid = '';
@@ -32,5 +32,5 @@ self.on("context", function (node) {
 });
 
 self.on("click", function(node, data) {
-  self.postMessage();
+  window.bbsfox.overlaycmd.exec({command:"addToBlacklist"});
 });

@@ -25,6 +25,14 @@
   opacity: 0.2;
 }
 
+.testElem {
+  white-space: pre;
+  left:-10000px;
+  top:-10000px;
+  position:absolute;
+  overflow: hidden;
+}
+
 .main {
   font-family: MingLiu, monospace;
   margin-top:0px;

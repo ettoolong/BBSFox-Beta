@@ -1,9 +1,9 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
-  let allLinks = unsafeWindow.document.getElementsByTagName('a');
-  return unsafeWindow.bbsfox.prefs.openAllLinkMenu && (allLinks.length > 0);
+  let allLinks = window.document.getElementsByTagName('a');
+  return window.bbsfox.prefs.openAllLinkMenu && (allLinks.length > 0);
 });
 
 self.on("click", function(node, data) {

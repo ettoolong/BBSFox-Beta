@@ -1,3 +1,5 @@
+const { classes: Cc, interfaces: Ci, Constructor: Co } = Components;
+
 function BBSFoxSiteSetting(opt, siteaddr, sitename, newsite) {
     this.opt = opt;
     this.browserutils = new BBSFoxBrowserUtils();
@@ -38,15 +40,15 @@ BBSFoxSiteSetting.prototype = {
 
   getPrefComp: function(elementId, prefName) {
     if(!prefName) prefName = elementId;
-    this.values[elementId] = this.prefs.getComplexValue(prefName, Components.interfaces.nsISupportsString).data;
+    this.values[elementId] = this.prefs.getComplexValue(prefName, Ci.nsISupportsString).data;
   },
 
   setPrefComp: function(elementId, prefName) {
     if(!prefName) prefName = elementId;
-    var nsIString = Components.classes["@mozilla.org/supports-string;1"]
-                              .createInstance(Components.interfaces.nsISupportsString);
+    var nsIString = Cc["@mozilla.org/supports-string;1"]
+                    .createInstance(Ci.nsISupportsString);
     nsIString.data = this.values[elementId];
-    this.prefs.setComplexValue(prefName, Components.interfaces.nsISupportsString, nsIString);
+    this.prefs.setComplexValue(prefName, Ci.nsISupportsString, nsIString);
   },
 
   getUiBool: function(elementId) {
@@ -143,7 +145,7 @@ BBSFoxSiteSetting.prototype = {
         }
         catch(e){
           //read this pref from default...
-          this.values[opt.valueComp[i]] = defaultPref.getComplexValue(opt.valueComp[i], Components.interfaces.nsISupportsString).data;
+          this.values[opt.valueComp[i]] = defaultPref.getComplexValue(opt.valueComp[i], Ci.nsISupportsString).data;
           this.setPrefComp(opt.valueComp[i]);
         }
       }
@@ -151,7 +153,7 @@ BBSFoxSiteSetting.prototype = {
       for(var i in opt.loginInfoSet){
         var url = (this.siteaddr == 'default') ? opt.loginInfoSet[i].ds : opt.loginInfoSet[i].ss + this.getFullUrl(this.siteaddr);
         try {
-          var logins = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager).findLogins({}, url, opt.loginInfoSet[i].ds, null);
+          var logins = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager).findLogins({}, url, opt.loginInfoSet[i].ds, null);
           if(logins.length)
           {
             this.values[opt.loginInfoSet[i].uk] = logins[0]['username'];
@@ -194,9 +196,9 @@ BBSFoxSiteSetting.prototype = {
         var url = (this.siteaddr == 'default') ? opt.loginInfoSet[i].ds : opt.loginInfoSet[i].ss + this.getFullUrl(this.siteaddr);
         if(this.values[opt.loginInfoSet[i].uk]!='' && this.values[opt.loginInfoSet[i].pk]!='') {
           try {
-            var myLoginInfo = new Components.Constructor("@mozilla.org/login-manager/loginInfo;1",Components.interfaces.nsILoginInfo,"init");
+            var myLoginInfo = new Co("@mozilla.org/login-manager/loginInfo;1",Ci.nsILoginInfo,"init");
             var login = new myLoginInfo(url, opt.loginInfoSet[i].ds, null, this.values[opt.loginInfoSet[i].uk], this.values[opt.loginInfoSet[i].pk], '', '');
-            Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager).addLogin(login);
+            Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager).addLogin(login);
           } catch(e) {}
         }
       }
@@ -209,7 +211,7 @@ BBSFoxSiteSetting.prototype = {
     for(var i in opt.loginInfoSet){
       var url = (this.siteaddr == 'default') ? opt.loginInfoSet[i].ds : opt.loginInfoSet[i].ss + this.getFullUrl(this.siteaddr);
       try {
-        var loginManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+        var loginManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
         var logins = loginManager.findLogins({}, url, opt.loginInfoSet[i].ds, null);
         for (var j = 0; j < logins.length; j++)
           loginManager.removeLogin(logins[j]);
@@ -220,14 +222,14 @@ BBSFoxSiteSetting.prototype = {
 
   charsetTest: function() {
     // detect system locale and save to pref
-    if(this.prefs.getComplexValue('Charset', Components.interfaces.nsISupportsString).data === 'locale') {
+    if(this.prefs.getComplexValue('Charset', Ci.nsISupportsString).data === 'locale') {
       let strBundle = document.getElementById("bbsfoxoptions-string-bundle");
-//      var PLStr = Components.interfaces.nsIPrefLocalizedString;
-      var nsIString = Components.classes["@mozilla.org/supports-string;1"].
-                      createInstance(Components.interfaces.nsISupportsString);
+//      var PLStr = Ci.nsIPrefLocalizedString;
+      var nsIString = Cc["@mozilla.org/supports-string;1"]
+                      .createInstance(Ci.nsISupportsString);
 //      nsIString.data = this.browserutils._prefBranch.getComplexValue('locale', PLStr).data;
       nsIString.data = strBundle.getString('extensions.bbsfox2.locale');
-      this.prefs.setComplexValue('Charset', Components.interfaces.nsISupportsString, nsIString);
+      this.prefs.setComplexValue('Charset', Ci.nsISupportsString, nsIString);
     }
   },
 
@@ -313,7 +315,7 @@ BBSFoxOptions.prototype = {
     siteAddr = options.getFullUrl(siteAddr);
     var siteAddr2 = siteAddr.replace(/:/g, '~');
 
-    var dstfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("TmpD", Components.interfaces.nsIFile);
+    var dstfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
     dstfile.append("_bg."+siteAddr2);
     //if file already exists delete it.
     if(dstfile.exists())
@@ -350,12 +352,12 @@ BBSFoxOptions.prototype = {
         return;
       }
       var strBundle = document.getElementById("bbsfoxoptions-string-bundle");
-      var s0 = document.getElementById("FontFaceTest.span0");
-      var s1 = document.getElementById("FontFaceTest.span1");
-      var s2 = document.getElementById("FontFaceTest.span2");
-      var s3 = document.getElementById("FontFaceTest.span3");
-      var s4 = document.getElementById("FontFaceTest.span4");
-      var s5 = document.getElementById("FontFaceTest.span5");
+      let spanElem = [];
+      let spanWidth = [];
+      for(var i = 0; i < 6; ++i) {
+        let elem = document.getElementById("FontFaceTest.span" + i);
+        spanElem.push(elem);
+      }
       var s9 = document.getElementById("FontTestResult");
 
       var fontface = document.getElementById("FontFace.string").value;
@@ -370,48 +372,31 @@ BBSFoxOptions.prototype = {
         s9.value = strBundle.getString('fontTestResult3');
         return;
       }
+      for(let elem of spanElem) {
+        elem.style.fontFamily = fontface;
+        elem.style.fontSize = "48px";
+      }
+      for(var i = 0; i < spanElem.length; ++i) {
+        spanWidth[i] = spanElem[i].offsetWidth;
+      }
 
-      s0.style.fontFamily = fontface;
-      s1.style.fontFamily = fontface;
-      s2.style.fontFamily = fontface;
-      s3.style.fontFamily = fontface;
-      s4.style.fontFamily = fontface;
-      s5.style.fontFamily = fontface;
-
-      s0.style.fontSize = "48px";
-      s1.style.fontSize = "48px";
-      s2.style.fontSize = "48px";
-      s3.style.fontSize = "48px";
-      s4.style.fontSize = "48px";
-      s5.style.fontSize = "48px";
-
-      var w0 = s0.offsetWidth;
-      var w1 = s1.offsetWidth;
-      var w2 = s2.offsetWidth;
-      var w3 = s3.offsetWidth;
-      var w4 = s4.offsetWidth;
-      var w5 = s5.offsetWidth;
-
-      if(w0==w1 && w1==w2 && w2==w3 && w3==w4 && w4==w5)
-      {
+      if(spanWidth[0] == spanWidth[1] && spanWidth[1] == spanWidth[2] &&
+         spanWidth[2] == spanWidth[3] && spanWidth[3] == spanWidth[4] &&
+         spanWidth[4] == spanWidth[5]) {
         s9.style.display = 'inline';
         s9.style.color ="#0000FF";
         s9.value = strBundle.getString('fontTestResult1');
-      }
-      else if(w1==w2 && w2==w3 && w3==w4 && w4==w5)
-      {
+      } else if( spanWidth[1] == spanWidth[2] && spanWidth[2] == spanWidth[3] &&
+                 spanWidth[3] == spanWidth[4] && spanWidth[4] == spanWidth[5]) {
         s9.style.display = 'inline';
         s9.style.color ="#FF0000";
         s9.value = strBundle.getString('fontTestResult4');
-      }
-      else if(w2==w3 && w3==w4 && w4==w5)
-      {
+      } else if(spanWidth[2] == spanWidth[3] && spanWidth[3] == spanWidth[4] &&
+                spanWidth[4] == spanWidth[5]) {
         s9.style.display = 'inline';
         s9.style.color ="#FF0000";
         s9.value = strBundle.getString('fontTestResult2');
-      }
-      else
-      {
+      } else {
         s9.style.display = 'inline';
         s9.style.color ="#FF0000";
         s9.value = strBundle.getString('fontTestResult3');
@@ -429,6 +414,14 @@ BBSFoxOptions.prototype = {
       var s3 = document.getElementById("FontFaceTest.span3");
       var s4 = document.getElementById("FontFaceTest.span4");
       var s5 = document.getElementById("FontFaceTest.span5");
+
+      let spanMap = {0:"2", 1:"3", 2:"4", 3:"5"};
+      let spanElem = [];
+      let spanWidth = [];
+      for(var i = 0; i < 4; ++i) {
+        let elem = document.getElementById("FontFaceTest.span" + spanMap[i]);
+        spanElem.push(elem);
+      }
       var s9 = document.getElementById("FontEnTestResult");
 
       var fontface = document.getElementById("FontFaceEn.string").value;
@@ -444,22 +437,15 @@ BBSFoxOptions.prototype = {
         return;
       }
 
-      s2.style.fontFamily = fontface;
-      s3.style.fontFamily = fontface;
-      s4.style.fontFamily = fontface;
-      s5.style.fontFamily = fontface;
+      for(let elem of spanElem) {
+        elem.style.fontFamily = fontface;
+        elem.style.fontSize = "48px";
+      }
+      for(var i = 0; i < spanElem.length; ++i) {
+        spanWidth[i] = spanElem[i].offsetWidth;
+      }
 
-      s2.style.fontSize = "48px";
-      s3.style.fontSize = "48px";
-      s4.style.fontSize = "48px";
-      s5.style.fontSize = "48px";
-
-      var w2 = s2.offsetWidth;
-      var w3 = s3.offsetWidth;
-      var w4 = s4.offsetWidth;
-      var w5 = s5.offsetWidth;
-
-      if(w2==w3 && w3==w4 && w4==w5)
+      if(spanWidth[0] == spanWidth[1] && spanWidth[1] == spanWidth[2] && spanWidth[2] == spanWidth[3])
       {
         s9.style.display = 'inline';
         s9.style.color ="#0000FF";
@@ -504,7 +490,7 @@ BBSFoxOptions.prototype = {
     this.allSiteSetting.push(defaultSiteSetting);
 
     var siteList = document.getElementById('siteListEx');
-    var CiStr = Components.interfaces.nsISupportsString;
+    var CiStr = Ci.nsISupportsString;
     for(var i=0; i<siteAddrList.length; ++i)
     {
       var row = document.createElement('listitem');
@@ -536,21 +522,21 @@ BBSFoxOptions.prototype = {
     for(var i in this.allSiteSetting){
       //copy file from tmpD to profD - start
       //TmpD / ProfD
-      var insLocation = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsIFile);
+      var insLocation = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
       var siteAddr = (i == 0 ? "default" : this.getFullUrl(this.allSiteSetting[i].siteaddr));
       var siteAddr2 = siteAddr.replace(/:/g, '~');
-      var dir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsIFile);
+      var dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
       if (!dir) return;
 
-      var dstfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsIFile);
-      var srcfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("TmpD", Components.interfaces.nsIFile);
+      var dstfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
+      var srcfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
       srcfile.append("_bg."+siteAddr2);
       dstfile.append("bbsfoxBg");
       dir.initWithPath(dstfile.path);
 
       if (!dstfile.exists() || !dstfile.isDirectory()) {
         // read and write permissions to owner and group, read-only for others.
-        dstfile.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0774);
+        dstfile.create(Ci.nsIFile.DIRECTORY_TYPE, 0774);
       }
       dstfile.append("_bg."+siteAddr2);
 
@@ -574,7 +560,7 @@ BBSFoxOptions.prototype = {
       var siteAddr = (i == 0 ? "default" : this.getFullUrl(this.allSiteSetting[i].siteaddr));
       var siteAddr2 = siteAddr.replace(/:/g, '~');
 
-      var dstfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("TmpD", Components.interfaces.nsIFile);
+      var dstfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
       dstfile.append("_bg."+siteAddr2);
       //if file already exists delete it.
       if(dstfile.exists())
@@ -618,8 +604,8 @@ BBSFoxOptions.prototype = {
   backup: function() {
     //  For reviewer:
     //  backup function - save all bbsfox preferences to sqlite file
-    var nsIFilePicker = Components.interfaces.nsIFilePicker;
-    var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    var nsIFilePicker = Ci.nsIFilePicker;
+    var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
     fp.init(window, null, nsIFilePicker.modeSave);
     fp.appendFilter("SQLite", "*.sqlite");
     fp.defaultString = "BBSFox_Backup.sqlite";
@@ -627,12 +613,12 @@ BBSFoxOptions.prototype = {
     fp.open(function(result) {
       if(result != fp.returnCancel && fp.file) {
 
-        var file = fp.file.QueryInterface(Components.interfaces.nsIFile);
+        var file = fp.file.QueryInterface(Ci.nsIFile);
         //if file already exists delete it.
         if(file.exists())
           file.remove(true);
 
-        var dbSvc = Components.classes["@mozilla.org/storage/service;1"].getService(Components.interfaces.mozIStorageService);
+        var dbSvc = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService);
         var dbConn = dbSvc.openDatabase(file);
 
         if (!dbConn.tableExists("bbsfox_Setting_str_table"))
@@ -644,9 +630,9 @@ BBSFoxOptions.prototype = {
         if (!dbConn.tableExists("bbsfox_Setting_picture_table"))
           dbConn.createTable("bbsfox_Setting_picture_table", "md5 TEXT, file BLOB");
 
-        var branch = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.bbsfox2.");
+        var branch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox2.");
         var prefIDs = branch.getChildList("", { });
-        var CiStr = Components.interfaces.nsISupportsString;
+        var CiStr = Ci.nsISupportsString;
         var stmt;
         var params;
 
@@ -654,7 +640,7 @@ BBSFoxOptions.prototype = {
         params = stmt.newBindingParamsArray();
         for(var i=0; i<prefIDs.length; ++i) {
           var vtype = branch.getPrefType(prefIDs[i]);
-          if(vtype == Components.interfaces.nsIPrefBranch.PREF_STRING)
+          if(vtype == Ci.nsIPrefBranch.PREF_STRING)
           {
             var row_params = params.newBindingParams();
             row_params.bindByIndex(0, prefIDs[i]);
@@ -673,7 +659,7 @@ BBSFoxOptions.prototype = {
         params = stmt.newBindingParamsArray();
         for(var i=0; i<prefIDs.length; ++i) {
           var vtype = branch.getPrefType(prefIDs[i]);
-          if(vtype == Components.interfaces.nsIPrefBranch.PREF_INT)
+          if(vtype == Ci.nsIPrefBranch.PREF_INT)
           {
             var row_params = params.newBindingParams();
             row_params.bindByIndex(0, prefIDs[i]);
@@ -692,7 +678,7 @@ BBSFoxOptions.prototype = {
         params = stmt.newBindingParamsArray();
         for(var i=0; i<prefIDs.length; ++i) {
           var vtype = branch.getPrefType(prefIDs[i]);
-          if(vtype == Components.interfaces.nsIPrefBranch.PREF_BOOL)
+          if(vtype == Ci.nsIPrefBranch.PREF_BOOL)
           {
             var row_params = params.newBindingParams();
             row_params.bindByIndex(0, prefIDs[i]);
@@ -737,15 +723,15 @@ BBSFoxOptions.prototype = {
   },
 
   backupbgfile: function(branch, dbConn, params, site) {
-    var CiStr = Components.interfaces.nsISupportsString;
+    var CiStr = Ci.nsISupportsString;
     var type = branch.getIntPref("host_"+site+".BackgroundType"); //check site background setting
     if(type!=0)
     {
       var md5 = branch.getComplexValue("host_"+site+".BackgroundImageMD5", CiStr).data;
       if(md5!="")
       {
-        var dir = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties);
-        var file = dir.get("ProfD", Components.interfaces.nsIFile);
+        var dir = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
+        var file = dir.get("ProfD", Ci.nsIFile);
         var site2 = site == 'default' ? site : this.getFullUrl(site);
         site2 = site2.replace(/:/g, '~');
         file.append("bbsfoxBg");
@@ -753,9 +739,9 @@ BBSFoxOptions.prototype = {
 
         if(file.exists())
         {
-          var fileStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
+          var fileStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
           fileStream.init(file, 1, 0, false);
-          var binaryStream = Components.classes['@mozilla.org/binaryinputstream;1'].createInstance(Components.interfaces.nsIBinaryInputStream);
+          var binaryStream = Cc['@mozilla.org/binaryinputstream;1'].createInstance(Ci.nsIBinaryInputStream);
           binaryStream.setInputStream(fileStream);
           var picdataArray = binaryStream.readByteArray(fileStream.available());
           binaryStream.close();
@@ -776,8 +762,8 @@ BBSFoxOptions.prototype = {
   recover: function() {
     //  For reviewer:
     //  recover function - load all bbsfox preferences from sqlite file
-    var nsIFilePicker = Components.interfaces.nsIFilePicker;
-    var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    var nsIFilePicker = Ci.nsIFilePicker;
+    var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
     fp.init(window, null, nsIFilePicker.modeOpen);
     fp.appendFilter("SQLite", "*.sqlite");
     //if (fp.show() == fp.returnCancel || !fp.file) return false;
@@ -787,17 +773,17 @@ BBSFoxOptions.prototype = {
 
         var strBundle = document.getElementById("bbsfoxoptions-string-bundle");
         var message = strBundle.getString('recoverwarning');
-        var promptSvc = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
+        var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
         if (!promptSvc.confirm(window, "BBSFox", message)) return;
 
         if(!fp.file.exists()) return false;
 
-        var dbSvc = Components.classes["@mozilla.org/storage/service;1"].getService(Components.interfaces.mozIStorageService);
+        var dbSvc = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService);
         var dbConn = dbSvc.openDatabase(fp.file);
 
-        var branch = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.bbsfox2.");
-        var nsIString = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-        var CiStr = Components.interfaces.nsISupportsString;
+        var branch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox2.");
+        var nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+        var CiStr = Ci.nsISupportsString;
         var hostregex = /^hostlist_(.{1,})/i;
         var newlist = [];
 
@@ -809,7 +795,7 @@ BBSFoxOptions.prototype = {
               while (row = aResultSet.getNextRow()) {
                 var key = row.getResultByIndex(0);
                 nsIString.data = row.getResultByIndex(1);
-                branch.setComplexValue(key, Components.interfaces.nsISupportsString, nsIString);
+                branch.setComplexValue(key, Ci.nsISupportsString, nsIString);
               }
             },
             handleError: function(){},
@@ -888,7 +874,7 @@ BBSFoxOptions.prototype = {
 
   recoverbgfile: function(branch, dbConn, site) {
     var _this = this;
-    var CiStr = Components.interfaces.nsISupportsString;
+    var CiStr = Ci.nsISupportsString;
     var type = branch.getIntPref("host_"+site+".BackgroundType");
     if(type!=0)
     {
@@ -908,22 +894,22 @@ BBSFoxOptions.prototype = {
                 if(key==md5) {
                   var value = row.getResultByIndex(1);
                   if(value.length) {
-                    var dir = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties);
-                    var file = dir.get("ProfD", Components.interfaces.nsIFile);
+                    var dir = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
+                    var file = dir.get("ProfD", Ci.nsIFile);
                     var site2 = (site == 'default') ? site : _this.getFullUrl(site);
                     site2 = site2.replace(/:/g, '~');
                     file.append("bbsfoxBg");
                     if (!file.exists() || !file.isDirectory()) {
                       // read and write permissions to owner and group, read-only for others.
-                      file.create(Components.interfaces.nsIFile.DIRECTORY_TYPE, 0774);
+                      file.create(Ci.nsIFile.DIRECTORY_TYPE, 0774);
                     }
                     file.append("_bg."+site2);
                     if(file.exists()) {
                       file.remove(true);
                     }
-                    var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].createInstance(Components.interfaces.nsIFileOutputStream);
+                    var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
                     foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0);
-                    var bostream = Components.classes['@mozilla.org/binaryoutputstream;1'].createInstance(Components.interfaces.nsIBinaryOutputStream);
+                    var bostream = Cc['@mozilla.org/binaryoutputstream;1'].createInstance(Ci.nsIBinaryOutputStream);
                     bostream.setOutputStream(foStream);
                     bostream.writeByteArray(value, value.length);
 
@@ -993,7 +979,7 @@ BBSFoxOptions.prototype = {
         for(var i in this.loginInfoSet){
           var url = this.loginInfoSet[i].ss + this.getFullUrl(nowSiteAddrList[j]);
           try {
-            var loginManager = Components.classes["@mozilla.org/login-manager;1"].getService(Components.interfaces.nsILoginManager);
+            var loginManager = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager);
             var logins = loginManager.findLogins({}, url, this.loginInfoSet[i].ds, null);
             for (var k = 0; k < logins.length; k++)
               loginManager.removeLogin(logins[k]);
@@ -1005,7 +991,7 @@ BBSFoxOptions.prototype = {
 
         //delet background image file - start
         var siteAddr2 = this.getFullUrl(nowSiteAddrList[j]).replace(/:/g, '~');
-        var dstfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsIFile);
+        var dstfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
         dstfile.append("_bg."+siteAddr2);
         if(dstfile.exists())
           dstfile.remove(true);
@@ -1017,8 +1003,8 @@ BBSFoxOptions.prototype = {
 
   notifyPage: function() {
     //notify page to check pref...
-    Components.classes["@mozilla.org/globalmessagemanager;1"]
-      .getService(Components.interfaces.nsIMessageBroadcaster)
+    Cc["@mozilla.org/globalmessagemanager;1"]
+      .getService(Ci.nsIMessageBroadcaster)
       .broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", {command:"checkPrefExist"});
   }
 };
@@ -1030,12 +1016,12 @@ function load() {
   options = new BBSFoxOptions();
   options.load();
 
-  var OS = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULRuntime).OS;
-  var as = Components.classes["@mozilla.org/alerts-service;1"];
+  var OS = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
+  var as = Cc["@mozilla.org/alerts-service;1"];
   var service;
   try
   {
-    service = as.getService(Components.interfaces.nsIAlertsService);
+    service = as.getService(Ci.nsIAlertsService);
   }
   catch(error)
   {
@@ -1058,7 +1044,7 @@ function load() {
   //document.getElementById('textspan').hidden=true;
   //document.getElementById('textedit').hidden=true;
 
-  var firegestureSrv = Components.classes["@xuldev.org/firegestures/service;1"];
+  var firegestureSrv = Cc["@xuldev.org/firegestures/service;1"];
   if(!firegestureSrv)
   {
     document.getElementById('FireGesturesOption').disabled=true;
@@ -1069,8 +1055,8 @@ function load() {
     document.getElementById('FireGesturesTest').hidden=false;
     document.getElementById('FireGesturesScript').hidden=false;
   }
-  var prefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.bbsfox2.");
-  var prefsEx = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.bbsfox1.");
+  var prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox2.");
+  var prefsEx = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox1.");
   var isDevVersion = prefs.getBoolPref('DevVersion');
   if(isDevVersion)
   {
@@ -1106,8 +1092,8 @@ function recover() { options.recover();}
 
 function onSelectBGImage()
 {
-  var nsIFilePicker = Components.interfaces.nsIFilePicker;
-  var fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+  var nsIFilePicker = Ci.nsIFilePicker;
+  var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
   fp.init(window, null, nsIFilePicker.modeOpen);
   fp.appendFilters(nsIFilePicker.filterImages);
   //if (fp.show() == nsIFilePicker.returnCancel) return;
@@ -1118,26 +1104,26 @@ function onSelectBGImage()
       if(!fp.file.exists()) return;
 
       //TmpD / ProfD
-      var insLocation = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("TmpD", Components.interfaces.nsIFile);
+      var insLocation = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
       var siteList = document.getElementById('siteListEx');
       var siteIndex = siteList.getIndexOfItem(siteList.selectedItems[0]);
       var siteAddr = siteIndex==0 ? 'default' : options.getFullUrl(siteList.selectedItems[0].childNodes[1].getAttribute('label'));
       var siteAddr2 = siteAddr.replace(/:/g, '~');
-      var dir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsIFile);
+      var dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
       if (!dir) return;
       dir.initWithPath(insLocation.path);
 
       //if file already exists delete it.
-      var dstfile = Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("TmpD", Components.interfaces.nsIFile);
+      var dstfile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
       dstfile.append("_bg."+siteAddr2);
       if(dstfile.exists())
         dstfile.remove(true);
 
       fp.file.copyTo(dir, "_bg."+siteAddr2);
 
-      var istream = Components.classes["@mozilla.org/network/file-input-stream;1"].createInstance(Components.interfaces.nsIFileInputStream);
+      var istream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
       istream.init(fp.file, 0x01, 0444, 0);
-      var ch = Components.classes["@mozilla.org/security/hash;1"].createInstance(Components.interfaces.nsICryptoHash);
+      var ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
       ch.init(ch.MD5);
       const PR_UINT32_MAX = 0xffffffff;
       ch.updateFromStream(istream, PR_UINT32_MAX);
@@ -1213,7 +1199,7 @@ function delSite() {
   var strBundle = document.getElementById("bbsfoxoptions-string-bundle");
   var message = strBundle.getFormattedString('delsitewarning',[sn]);
   var wintitle = strBundle.getString('delsitetitle');
-  var promptSvc = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
+  var promptSvc = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
   if (!promptSvc.confirm(window, wintitle, message))
     return;
   options.delSite();
@@ -1225,8 +1211,8 @@ function onFontEnChange() { options.onFontEnChange();}
 function onLineSupport(){openURL('http://forum.moztw.org/viewtopic.php?f=11&t=30217');}
 function onLineSupport2(){openURL('http://forum.moztw.org/viewtopic.php?f=11&t=31697');}
 function openURL(aURL){
-  var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-           .getService(Components.interfaces.nsIWindowMediator)
+  var win = Cc["@mozilla.org/appshell/window-mediator;1"]
+           .getService(Ci.nsIWindowMediator)
            .getMostRecentWindow("navigator:browser");
   if (win)
     win.gBrowser.loadOneTab(aURL, null, null, null, false, false);
@@ -1238,10 +1224,10 @@ function fireGesturesScript(){
 }
 
 function fireGesturesOption(){
-  var firegestureSrv = Components.classes["@xuldev.org/firegestures/service;1"];
+  var firegestureSrv = Cc["@xuldev.org/firegestures/service;1"];
   if(firegestureSrv)
   {
-    var gestureSvc = firegestureSrv.getService(Components.interfaces.xdIGestureService);
+    var gestureSvc = firegestureSrv.getService(Ci.xdIGestureService);
     if(gestureSvc)
     {
       var gestureMapping = gestureSvc.getMappingForBrowser();
@@ -1319,7 +1305,7 @@ function checkSelect2()
 
 function copyScript()
 {
-  var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
+  var clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
   var elem = document.getElementById('scriptText');
   clipboardHelper.copyString(elem.value);
 }

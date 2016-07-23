@@ -52,8 +52,6 @@ BBSPPTPicLoader.prototype={
     if(this.listener && this.regEx.test(url))
     {
       //we need block some url at here!
-      //var consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
-      //consoleService.logStringMessage("BBSFox: B=" + this.codeBlockList.length + ", Q=" + this.codeQueue.length + ", P =" + this.codePicture.length);
       var shortCode = url.substr(this.pptUrlLength);
       this.listener.cb_locate();
       if(this.lastSuccessUrl==url)

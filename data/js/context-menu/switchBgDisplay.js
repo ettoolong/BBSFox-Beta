@@ -1,10 +1,10 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
-  return unsafeWindow.bbsfox.prefs.switchBgDisplayMenu && unsafeWindow.bbsfox.prefs.enableBackground;
+  return window.bbsfox.prefs.switchBgDisplayMenu && window.bbsfox.prefs.enableBackground;
 });
 
 self.on("click", function(node, data) {
-  self.postMessage();
+  window.bbsfox.overlaycmd.exec({command:"switchBgDisplay"});
 });

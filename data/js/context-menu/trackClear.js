@@ -1,10 +1,10 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
 
-  if(unsafeWindow.bbsfox.prefs.keyWordTrackMenu) {
-    let highlightWords = unsafeWindow.bbsfox.prefs.highlightWords_local;
+  if(window.bbsfox.prefs.keyWordTrackMenu) {
+    let highlightWords = window.bbsfox.prefs.highlightWords_local;
     return (highlightWords.length > 0);
   }
   else {
@@ -13,6 +13,6 @@ self.on("context", function (node) {
 });
 
 self.on("click", function(node, data) {
-  self.postMessage();
-  //unsafeWindow.bbsfox.overlaycmd.exec({command:"previewPicture", pictureUrl:eventStatus.pictureUrl});
+  //self.postMessage();
+  window.bbsfox.overlaycmd.exec({command:"doClearTrack"});
 });

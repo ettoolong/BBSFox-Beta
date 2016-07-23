@@ -12,8 +12,8 @@ function SymbolInput(bbscore) {
 
   this.symbolPageCount = 12;
   var keydata;
-  var ioService = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
-  var ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
+  var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+  var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
   var sp = ssm.getSystemPrincipal();
   var channel = ioService.newChannel2("chrome://bbsfox/content/res/keyboard.res", //aSpec
                        null, //aOriginCharset
@@ -21,12 +21,12 @@ function SymbolInput(bbscore) {
                        null, //aLoadingNode
                        sp, //aLoadingPrincipal
                        null, //aTriggeringPrincipal
-                       Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-                       Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+                       Ci.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+                       Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
 
   var ins = channel.open();
-  var scriptableStream=Components.classes["@mozilla.org/scriptableinputstream;1"].getService(Components.interfaces.nsIScriptableInputStream);
-  var unicodeConverter = Components.classes["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Components.interfaces.nsIScriptableUnicodeConverter);
+  var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
+  var unicodeConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
   unicodeConverter.charset = 'UTF-8';
   scriptableStream.init(ins);
   var str=scriptableStream.read(ins.available());
@@ -60,8 +60,7 @@ SymbolInput.prototype={
   },
 
   mousedown: function(event) {
-    if(event.target.classList.contains('buttonUI') ||
-       event.target.tagName.indexOf('menuitem') >= 0)
+    if(event.target.classList.contains('buttonUI') || event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION' )
       return;
 
     this.offX = event.pageX;

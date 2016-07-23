@@ -230,8 +230,6 @@ function EmbeddedPlayer(bbscore, playerURL, showbtn, playerSize) {
 
 EmbeddedPlayer.prototype={
 
-  //timerMinWindow: Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer),
-
   selectitem: function(event) {
     var w;
     var h;
@@ -268,7 +266,7 @@ EmbeddedPlayer.prototype={
   },
 
   mousedown: function(event) {
-    if(event.target.classList.contains('buttonUI') || event.target.tagName.indexOf('menuitem') >= 0)
+    if(event.target.classList.contains('buttonUI') || event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION' )
       return;
 
     this.offX = event.pageX;
@@ -443,14 +441,13 @@ EmbeddedPlayer.prototype={
 
   copyPlayerWindowUrl: function()
   {
-      var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                                      .getService(Components.interfaces.nsIClipboardHelper);
+      var clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"]
+                            .getService(Ci.nsIClipboardHelper);
       clipboardHelper.copyString(this.playerURL);
   },
 
   minPlayerWindow: function()
   {
-      //this.timerMinWindow.cancel();
       var maxzindex = this.CmdHandler.getAttribute("MaxZIndex");
       ++maxzindex;
       this.CmdHandler.setAttribute("MaxZIndex", maxzindex);
@@ -521,27 +518,6 @@ EmbeddedPlayer.prototype={
       }
   },
 
-  minWindow: function()
-  {
-
-    //   var nw = parseFloat(this.playerDiv2.style.width);
-    //   var nh = parseFloat(this.playerDiv2.style.height);
-    //   nw = nw/1.6;
-    //   nh = nh/1.6;
-
-    //   if(nw<54 || nh<21)
-    //   {
-    //     this.playerDiv2.style.width = '54px';
-    //     this.playerDiv2.style.height = '21px';
-    //   }
-    //   else
-    //   {
-    //     this.playerDiv2.style.width = nw+'px';
-    //     this.playerDiv2.style.height = nh+'px';
-    //     this.timerMinWindow.initWithCallback(this, 40, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
-    //   }
-  },
-
   restroeWindow: function()
   {
       var maxzindex = this.CmdHandler.getAttribute("MaxZIndex");
@@ -558,11 +534,6 @@ EmbeddedPlayer.prototype={
         this.playerDiv.style.zIndex = maxzindex;
       }
   },
-
-//   notify: function(timer) {
-//     if(timer==this.timerMinWindow)
-//         this.minWindow();
-//   }
 };
 
 function EmbeddedPlayerMgr(bbscore) {
@@ -580,7 +551,6 @@ function EmbeddedPlayerMgr(bbscore) {
 }
 
 EmbeddedPlayerMgr.prototype={
-  //timerMinWindow: Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer),
   youtubeRegEx: /(https?:\/\/(?:www|m)\.youtube\.com\/watch\?.*v=([A-Za-z0-9._%-]*)|https?:\/\/youtu\.be\/([A-Za-z0-9._%-]*))/i,
   youtubeRegEx1: /https?:\/\/(?:www|m)\.youtube\.com\/watch\?.*v=([A-Za-z0-9._%-]*)/i,
   youtubeRegEx2: /https?:\/\/youtu\.be\/([A-Za-z0-9._%-]*)/i,

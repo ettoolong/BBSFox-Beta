@@ -15,14 +15,14 @@ var addonBaseUrl = null;
 function startup(aData, aReason) {
   startupBS(aData, aReason);
   addonBaseUrl = aData.resourceURI.spec;
-  let globalMM = Cc['@mozilla.org/globalmessagemanager;1'].getService(Ci.nsIFrameScriptLoader);
-  globalMM.loadFrameScript(addonBaseUrl + 'data/js/frame-script.js', true);
+  let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIFrameScriptLoader);
+  globalMM.loadFrameScript(addonBaseUrl + "data/js/frame-script.js", true);
 }
 
 function shutdown(aData, aReason) {
   shutdownBS(aData, aReason);
   if (aReason == APP_SHUTDOWN)
     return;
-  let globalMM = Cc['@mozilla.org/globalmessagemanager;1'].getService(Ci.nsIMessageBroadcaster);
-  globalMM.removeDelayedFrameScript(addonBaseUrl + 'data/js/frame-script.js');
+  let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster);
+  globalMM.removeDelayedFrameScript(addonBaseUrl + "data/js/frame-script.js");
 }

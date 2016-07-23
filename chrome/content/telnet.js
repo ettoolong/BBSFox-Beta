@@ -37,9 +37,6 @@ const STATE_DO=4;
 const STATE_DONT=5;
 const STATE_SB=6;
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-
 function ConnectCore(listener) {
     this.transport = null;
     this.inputStream = null;

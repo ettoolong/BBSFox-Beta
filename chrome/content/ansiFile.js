@@ -35,7 +35,7 @@ AnsiFile.prototype = {
     },
 
     loadFile: function() {
-      var nsIFilePicker = Components.interfaces.nsIFilePicker;
+      var nsIFilePicker = Ci.nsIFilePicker;
       bbsfox.sendCoreCommand({command: "openFilepicker",
                               title: null,
                               mode: nsIFilePicker.modeOpen,
@@ -44,7 +44,7 @@ AnsiFile.prototype = {
     },
 
     saveFile: function(data, saveMode) {
-      var nsIFilePicker = Components.interfaces.nsIFilePicker;
+      var nsIFilePicker = Ci.nsIFilePicker;
       var defaultExtension = '';
       var defaultString = '';
       var appendFilters = [];

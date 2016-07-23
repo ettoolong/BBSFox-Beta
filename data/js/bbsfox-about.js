@@ -1,5 +1,5 @@
 "use strict";
-let {components, Cu, Cc, Ci, Cm, Cr} = require("chrome");
+let {components, Cc, Ci, Cm, Cr} = require("chrome");
 
 //reference: https://developer.mozilla.org/en-US/docs/Custom_about:_URLs
 
@@ -51,4 +51,4 @@ function BBSFoxAboutFactory() {
     this.register();
 }
 
-exports.BBSFoxAbout = BBSFoxAboutFactory;
+exports.Page = BBSFoxAboutFactory;

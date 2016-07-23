@@ -194,7 +194,7 @@ function TermBuf(cols, rows) {
 }
 
 TermBuf.prototype={
-    timerUpdate: Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer),
+    timerUpdate: Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer),
 
     // From: http://snippets.dzone.com/posts/show/452
     //uriRegEx: /(ftp|http|https|telnet):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/ig,
@@ -348,12 +348,14 @@ TermBuf.prototype={
             var ch=str[i];
             switch(ch) {
             case '\x07':
-                if(bbsfox.selectStatus && this.prefs.notifyWhenBackground)
-                  continue;
-                if(this.prefs.notifyShowContent)
-                  this.view.showAlertMessageEx(false, this.prefs.notifyByMessage, this.prefs.notifyBySound, "");
-                else
-                  this.view.showAlertMessageEx(this.prefs.notifyBlockByTime, this.prefs.notifyByMessage, this.prefs.notifyBySound, this.severNotifyStr);
+                if(this.prefs.enableNotification) {
+                  if(bbsfox.selectStatus && this.prefs.notifyWhenBackground)
+                    continue;
+                  if(this.prefs.notifyShowContent)
+                    this.view.showAlertMessageEx(false, this.prefs.notifyByMessage, this.prefs.notifyBySound, "");
+                  else
+                    this.view.showAlertMessageEx(this.prefs.notifyBlockByTime, this.prefs.notifyByMessage, this.prefs.notifyBySound, this.severNotifyStr);
+                }
                 continue;
             case '\b':
                 this.back();
@@ -920,9 +922,9 @@ TermBuf.prototype={
     queueUpdate: function(directupdate) {
         this.timerUpdate.cancel();
         if(directupdate)
-          this.timerUpdate.initWithCallback(this, 1, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+          this.timerUpdate.initWithCallback(this, 1, Ci.nsITimer.TYPE_ONE_SHOT);
         else
-          this.timerUpdate.initWithCallback(this, this.prefs.viewBufferTimer, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+          this.timerUpdate.initWithCallback(this, this.prefs.viewBufferTimer, Ci.nsITimer.TYPE_ONE_SHOT);
     },
 
     notify: function(timer) {
@@ -972,10 +974,10 @@ TermBuf.prototype={
         this.view.blinkShow=!this.view.blinkShow;
         //
         var allBlinkSpan = document.getElementsByTagName('x');
-        for (var i = 0; i < allBlinkSpan.length; i++)
+        for (let blinkSpan of allBlinkSpan)
         {
-          var c = (this.view.blinkShow && this.view.doBlink)? allBlinkSpan[i].getAttribute("h") : allBlinkSpan[i].getAttribute("s");
-          allBlinkSpan[i].parentNode.setAttribute("class", c);
+          var c = (this.view.blinkShow && this.view.doBlink)? blinkSpan.getAttribute("h") : blinkSpan.getAttribute("s");
+          blinkSpan.parentNode.setAttribute("class", c);
         }
       }
       //}

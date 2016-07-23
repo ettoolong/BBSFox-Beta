@@ -1,16 +1,16 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
 
-  if(unsafeWindow.bbsfox.prefs.keyWordTrackMenu) {
-    let selstr = unsafeWindow.getSelection().toString().replace('\r\n','\n');
+  if(window.bbsfox.prefs.keyWordTrackMenu) {
+    let selstr = window.getSelection().toString().replace('\r\n','\n');
     let strArray = selstr.split('\n');
-    let prefs = unsafeWindow.bbsfox.prefs;
+    let prefs = window.bbsfox.prefs;
     let highlightWords_raw = prefs.highlightWords_local;
     let highlightWords_lowCase = prefs.highlightWords_local.join('\n').toLowerCase().split('\n');
 
-    selstr = unsafeWindow.bbsfox.trim_both(strArray[0]);
+    selstr = window.bbsfox.trim_both(strArray[0]);
     if(selstr != '') {
       let findflag = false;
       if(prefs.keyWordTrackCaseSensitive) {
@@ -29,6 +29,6 @@ self.on("context", function (node) {
 });
 
 self.on("click", function(node, data) {
-  self.postMessage();
-  //unsafeWindow.bbsfox.overlaycmd.exec({command:"previewPicture", pictureUrl:eventStatus.pictureUrl});
+  //self.postMessage();
+  window.bbsfox.overlaycmd.exec({command:"doAddTrack"});
 });

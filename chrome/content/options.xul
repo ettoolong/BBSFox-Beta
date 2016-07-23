@@ -789,6 +789,7 @@
                         <label id="AlarmServiceTest2" value="&options_needGrowl2.label;" style="color:#0000FF;margin:0px" class="text-link" onclick="openURL('http://growl.info/');" hidden="true"/>
                         <label id="AlarmServiceTest3" value="&options_needGrowl3.label;" style="color:#FF0000;" hidden="true"/>
                       </hbox>
+                      <checkbox id="EnableNotification" label="&options_enablenotification.label;" bbsfoxDefaultValue="true"/>
                       <checkbox id="NotifyWhenBackground" label="&options_notifywhenbackground.label;" bbsfoxDefaultValue="true"/>
                       <hbox>
                         <checkbox id="NotifyBySound" label="&options_notifybysound.label;" bbsfoxDefaultValue="false"/>

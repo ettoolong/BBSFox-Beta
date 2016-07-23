@@ -1,11 +1,9 @@
 // Main Program
 
 function BBSFox() {
-    this.os = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULRuntime).OS;
-    var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
-    this.FXVersion = parseFloat(appInfo.version);
+    this.os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 
-    Components.utils.import("chrome://bbsfox/content/uao/uao.js");
+    Cu.import("chrome://bbsfox/content/uao/uao.js");
 
     this.CmdHandler = document.getElementById('cmdHandler');
     this.CmdHandler.setAttribute('bbsfox', true);
@@ -96,7 +94,7 @@ function BBSFox() {
 }
 
 BBSFox.prototype={
-    _bundle: Components.classes["@mozilla.org/intl/stringbundle;1"].getService(Components.interfaces.nsIStringBundleService)
+    _bundle: Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService)
             .createBundle("chrome://bbsfox/locale/bbsfox.properties"),
 
     youtubeRegEx: /(https?:\/\/(?:www|m)\.youtube\.com\/watch\?.*v=([A-Za-z0-9._%-]*)|https?:\/\/youtu\.be\/([A-Za-z0-9._%-]*))/i,
@@ -227,8 +225,8 @@ BBSFox.prototype={
         this.connectState = 1;
         this.updateTabIcon('connect');
         this.unusedTime = 0;
-        this.timerOnsec = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-        this.timerOnsec.initWithCallback(this, 1000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
+        this.timerOnsec = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+        this.timerOnsec.initWithCallback(this, 1000, Ci.nsITimer.TYPE_REPEATING_SLACK);
     },
 
     onData: function(conn, data) {
@@ -395,7 +393,7 @@ BBSFox.prototype={
     },
 
     doCopy: function(str) {
-      var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"].getService(Components.interfaces.nsIClipboardHelper);
+      var clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
       if(this.prefs.deleteSpaceWhenCopy)
         str = str.replace(/[ \t\f]+$/gm,'');
       clipboardHelper.copyString(str);
@@ -454,15 +452,14 @@ BBSFox.prototype={
     },
 
     doDelayPasteText: function() {
-      var clip = Components.classes["@mozilla.org/widget/clipboard;1"]
-                            .getService(Components.interfaces.nsIClipboard);
+      var clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
       if(clip)
       {
-        var trans = Components.classes["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
+        var trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
         if (trans){
-          var loadContext = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebNavigation)
-                  .QueryInterface(Components.interfaces.nsILoadContext);
+          var loadContext = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation)
+                  .QueryInterface(Ci.nsILoadContext);
           trans.init(loadContext);
           trans.addDataFlavor("text/unicode");
           clip.getData(trans, clip.kGlobalClipboard);
@@ -470,7 +467,7 @@ BBSFox.prototype={
           var len={};
           trans.getTransferData("text/unicode", data, len);
           if(data && data.value) {
-            var s = data.value.QueryInterface(Components.interfaces.nsISupportsString);
+            var s = data.value.QueryInterface(Ci.nsISupportsString);
             s = s.data.substring(0, len.value / 2);
             s = s.replace(/\r\n/g, '\r');
             s = s.replace(/\n/g, '\r');
@@ -501,14 +498,14 @@ BBSFox.prototype={
     doPaste: function(extbuf) {
         if(this.conn) {
             // From: https://developer.mozilla.org/en/Using_the_Clipboard
-            var clip = Components.classes["@mozilla.org/widget/clipboard;1"].getService(Components.interfaces.nsIClipboard);
+            var clip = Cc["@mozilla.org/widget/clipboard;1"].getService(Ci.nsIClipboard);
             if(!clip)
                 return false;
-            var trans = Components.classes["@mozilla.org/widget/transferable;1"].createInstance(Components.interfaces.nsITransferable);
+            var trans = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
             if (!trans) return false;
-            var loadContext = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                  .getInterface(Components.interfaces.nsIWebNavigation)
-                  .QueryInterface(Components.interfaces.nsILoadContext);
+            var loadContext = window.QueryInterface(Ci.nsIInterfaceRequestor)
+                  .getInterface(Ci.nsIWebNavigation)
+                  .QueryInterface(Ci.nsILoadContext);
             trans.init(loadContext);
             trans.addDataFlavor("text/unicode");
             clip.getData(trans, clip.kGlobalClipboard);
@@ -523,7 +520,7 @@ BBSFox.prototype={
               return;
             }
             if(data && data.value) {
-                var s=data.value.QueryInterface(Components.interfaces.nsISupportsString);
+                var s=data.value.QueryInterface(Ci.nsISupportsString);
                 s = s.data.substring(0, len.value / 2);
                 s = s.replace(/\r\n/g, '\r');
                 s = s.replace(/\n/g, '\r');
@@ -548,8 +545,7 @@ BBSFox.prototype={
     },
 
     doCopyHtml: function() {
-      var clipboardHelper = Components.classes["@mozilla.org/widget/clipboardhelper;1"]
-                                       .getService(Components.interfaces.nsIClipboardHelper);
+      var clipboardHelper = Cc["@mozilla.org/widget/clipboardhelper;1"].getService(Ci.nsIClipboardHelper);
       clipboardHelper.copyString(this.getPageSourceCode());
     },
 
@@ -558,7 +554,7 @@ BBSFox.prototype={
     },
 
     saveDialog: function(data) {
-      var nsIFilePicker = Components.interfaces.nsIFilePicker;
+      var nsIFilePicker = Ci.nsIFilePicker;
       this.sendCoreCommand({command: "openFilepicker",
                             title: null,
                             mode: nsIFilePicker.modeSave,
@@ -570,9 +566,9 @@ BBSFox.prototype={
     },
 
     getCssData: function(filename) {
-      var ioService = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
+      var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
       //var channel = ioService.newChannel('chrome://bbsfox/skin/'+filename+'.css', null, null);
-      var ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
+      var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
       var sp = ssm.getSystemPrincipal();
       var channel = ioService.newChannel2("chrome://bbsfox/skin/"+filename+".css", //aSpec
                                           null, //aOriginCharset
@@ -580,11 +576,11 @@ BBSFox.prototype={
                                           null, //aLoadingNode
                                           sp, //aLoadingPrincipal
                                           null, //aTriggeringPrincipal
-                                          Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-                                          Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+                                          Ci.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+                                          Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
 
       var ins = channel.open();
-      var scriptableStream=Components.classes["@mozilla.org/scriptableinputstream;1"].getService(Components.interfaces.nsIScriptableInputStream);
+      var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
       scriptableStream.init(ins);
       var str=scriptableStream.read(ins.available());
       scriptableStream.close();
@@ -665,15 +661,6 @@ BBSFox.prototype={
       return selstr;
     },
 
-    getIndexOf: function(arr, str) {
-      str = str.toLowerCase();
-      for(var i=0;i<arr.length;++i) {
-        if(arr[i].toLowerCase() == str)
-          return i;
-      }
-      return -1;
-    },
-
     doClearTrack: function() {
       this.prefs.highlightWords_local = [];
       this.redraw();
@@ -692,6 +679,11 @@ BBSFox.prototype={
     },
 
     doDelTrack: function() {
+      let getIndexOf = function(arr, str) {
+        str = str.toLowerCase();
+        arr = arr.map( item => item.toLowerCase() );
+        return arr.indexOf(str);
+      };
       var selstr = window.getSelection().toString().replace('\r\n','\n');
       var strArray = selstr.split('\n');
 
@@ -707,10 +699,10 @@ BBSFox.prototype={
             idx = highlightWords_local.indexOf(selstr);
           }
         } else {
-          idx = this.getIndexOf(highlightWords_local, selstr);
+          idx = getIndexOf(highlightWords_local, selstr);
           while( idx != -1) {
             highlightWords_local.splice(idx, 1);
-            idx = this.getIndexOf(highlightWords_local, selstr);
+            idx = getIndexOf(highlightWords_local, selstr);
           }
         }
         this.redraw();
@@ -720,9 +712,10 @@ BBSFox.prototype={
     doOpenAllLink: function() {
       var allLinks = document.getElementsByTagName('a');
       var urls = [];
+      for(let link of allLinks) {
+        urls.push(link.getAttribute("href"));
+      }
       var charset = document.characterSet;
-      for (var i = 0; i < allLinks.length; i++)
-        urls.push(allLinks[i].getAttribute("href"));
       this.sendCoreCommand({command: "openNewTabs", charset: charset, ref: null, loadInBg: true, urls:urls});
     },
 
@@ -1193,9 +1186,11 @@ BBSFox.prototype={
             if(event.target.className)
               if(event.target.classList.contains('extUI'))
                 doMouseCommand = false;
-            if(event.target.tagName)
-              if(event.target.tagName.indexOf("menuitem") >= 0 )
+            if(event.target.tagName) {
+              //if(event.target.tagName.indexOf("menuitem") >= 0 )
+              if(event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION')
                 doMouseCommand = false;
+            }
             if(skipMouseClick)
             {
               doMouseCommand = false;
@@ -1247,8 +1242,10 @@ BBSFox.prototype={
           if(event.target.classList.contains('extUI'))
             onbbsarea = false;
         if(event.target.tagName) {
-          if(event.target.tagName.indexOf("menuitem") >= 0)
+          //if(event.target.tagName.indexOf("menuitem") >= 0)
+          if(event.target.tagName === "SELECT" || event.target.tagName === "OPTION") {
             onbbsarea = false;
+          }
         }
         // Press left key for 1 sec
         this.cancelMouseDownTimer();
@@ -1290,19 +1287,25 @@ BBSFox.prototype={
             if(this.prefs.useMouseBrowsing)
               this.onMouse_move(event.clientX, event.clientY);
 
-            this.setInputAreaFocus();
+            var setFocus = true;
             if(event.button==0)
             {
               var preventDefault = true;
               if(event.target.className)
                 if(event.target.classList.contains('extUI'))
                   preventDefault = false;
-              if(event.target.tagName)
-                if(event.target.tagName.indexOf("menuitem") >= 0)
+              if(event.target.tagName) {
+                //if(event.target.tagName.indexOf("menuitem") >= 0)
+                if(event.target.tagName === "SELECT" || event.target.tagName === "OPTION") {
                   preventDefault = false;
+                  setFocus = false;
+                }
+              }
               if(preventDefault)
                 event.preventDefault();
             }
+            if(setFocus)
+              this.setInputAreaFocus();
           }
           else //something has be select
           {
@@ -1325,6 +1328,8 @@ BBSFox.prototype={
     },
 
     mouse_move: function(event) {
+      if(event.target && (event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION') )
+        return;
       this.view.tempPicX = event.clientX;
       this.view.tempPicY = event.clientY;
       //if we draging window, pass all detect.
@@ -1474,6 +1479,8 @@ BBSFox.prototype={
     },
 
     mouse_over: function(event) {
+      if(event.target && (event.target.tagName === 'SELECT' || event.target.tagName === 'OPTION') )
+        return;
       if(window.getSelection().isCollapsed && !this.mouseLeftButtonDown)
         this.setInputAreaFocus();
     },
@@ -1509,7 +1516,7 @@ BBSFox.prototype={
       else if(isFile)
       {
         var file = dt.mozGetDataAt("application/x-moz-file", 0);
-        if (file instanceof Components.interfaces.nsIFile)
+        if (file instanceof Ci.nsIFile)
         {
           //do default action(or we check 'xpi' for install, other for upload);
         }

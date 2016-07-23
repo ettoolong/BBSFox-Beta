@@ -40,7 +40,7 @@
 
 //reference: Using JavaScript code modules
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Using
-
+const {classes: Cc, interfaces: Ci, results: Cr, ID: Cid  } = Components;
 var EXPORTED_SYMBOLS = ["SshProtocol"];
 
 // SSH protocol related
@@ -49,24 +49,24 @@ const kSCHEME = "ssh";
 const kSTANDARDURL_CONTRACTID = "@mozilla.org/network/standard-url;1";
 const kIOSERVICE_CONTRACTID   = "@mozilla.org/network/io-service;1";
 
-const nsISupports        = Components.interfaces.nsISupports;
-const nsIIOService       = Components.interfaces.nsIIOService;
-const nsIProtocolHandler = Components.interfaces.nsIProtocolHandler;
-const nsIURI             = Components.interfaces.nsIURI;
-const nsIStandardURL     = Components.interfaces.nsIStandardURL;
+const nsISupports        = Ci.nsISupports;
+const nsIIOService       = Ci.nsIIOService;
+const nsIProtocolHandler = Ci.nsIProtocolHandler;
+const nsIURI             = Ci.nsIURI;
+const nsIStandardURL     = Ci.nsIStandardURL;
 
 function SshProtocol(){}
 
 SshProtocol.prototype =
 {
   classDescription: "SSH Protocol",
-  classID: Components.ID("dbc42190-21eb-11e0-ac64-0800200c9a66"),
+  classID: Cid("dbc42190-21eb-11e0-ac64-0800200c9a66"),
   contractID: "@mozilla.org/network/protocol;1?name="+ kSCHEME,
   QueryInterface: function QueryInterface(iid){
-    if (iid.equals(Components.interfaces.nsIProtocolHandler))
+    if (iid.equals(Ci.nsIProtocolHandler))
       return this;
     else
-      throw Components.results.NS_ERROR_NO_INTERFACE;
+      throw Cr.NS_ERROR_NO_INTERFACE;
   },
   scheme: kSCHEME,
   defaultPort: 22,
@@ -83,7 +83,7 @@ SshProtocol.prototype =
     // Parameters:
     // * aUrlType: URLTYPE_AUTHORITY will always convert ssh:, ssh:/, ssh://, ssh:/// to ssh://
     // * aDefaultPort: will convert ssh://ptt.cc:22 to ssh://ptt.cc
-    let url = Components.classes[kSTANDARDURL_CONTRACTID].createInstance(nsIStandardURL);
+    let url = Cc[kSTANDARDURL_CONTRACTID].createInstance(nsIStandardURL);
     url.init(nsIStandardURL.URLTYPE_AUTHORITY, 22, spec, charset, baseURI);
     // Filter and return the pure URI
     let cleanURI = url.QueryInterface(nsIURI);
@@ -96,17 +96,7 @@ SshProtocol.prototype =
 
   newChannel: function(aURI, aSecurity_or_aLoadInfo) {
     // create dummy nsIURI and nsIChannel instances
-    let ios = Components.classes[kIOSERVICE_CONTRACTID].getService(nsIIOService);
-    // let ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
-    // let sp = ssm.getSystemPrincipal();
-    // return ios.newChannel2("chrome://bbsfox/content/ssh.html", //aSpec
-    //                        null, //aOriginCharset
-    //                        null, //aBaseURI
-    //                        null, //aLoadingNode
-    //                        sp, //aLoadingPrincipal
-    //                        null, //aTriggeringPrincipal
-    //                        Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-    //                        Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+    let ios = Cc[kIOSERVICE_CONTRACTID].getService(nsIIOService);
     let uri = ios.newURI("chrome://bbsfox/content/ssh.html", null, null);
     return ios.newChannelFromURIWithLoadInfo(uri, aSecurity_or_aLoadInfo);
   }

@@ -61,6 +61,7 @@ function bbsfoxPrefHandler(listener) {
     this.easyReadingWithImg=false;
     this.easyReadingWithVideo=false;
     this.epWhenDropLink=true;
+    this.enableNotification=true;
     this.notifyWhenBackground=true;
     this.notifyBySound=true;
     this.notifyByMessage=true;
@@ -129,7 +130,7 @@ bbsfoxPrefHandler.prototype={
     onPrefChange: function(bbsCore, branch, name) {
       var _this = bbsCore.prefs;
       try {
-        var CiStr = Components.interfaces.nsISupportsString;
+        var CiStr = Ci.nsISupportsString;
         switch (name) {
         case "MouseWheelFunc1":
           _this.updateEventPrefs([{key:'mouseWheelFunc1', value:branch.getIntPref(name)}]);
@@ -337,11 +338,16 @@ bbsfoxPrefHandler.prototype={
           if(!_this.fontFaceEn) {
             bbsCore.view.mainDisplay.style.fontFamily = _this.fontFace;
             bbsCore.view.cursorDiv.style.fontFamily = _this.fontFace;
+            bbsCore.view.spaceCharacterElem.style.fontFamily = _this.fontFace;
+            bbsCore.view.nbspCharacterElem.style.fontFamily = _this.fontFace;
           } else {
             bbsCore.view.setFontDefine(_this.fontFace, _this.fontFaceEn);
             bbsCore.view.mainDisplay.style.fontFamily = 'BBSFoxFont';
             bbsCore.view.cursorDiv.style.fontFamily = 'BBSFoxFont';
+            bbsCore.view.spaceCharacterElem.style.fontFamily = _this.fontFaceEn;
+            bbsCore.view.nbspCharacterElem.style.fontFamily = _this.fontFaceEn;
           }
+          bbsCore.view.setSpaceCharacter();
           //bbsCore.view.mainDisplay.style.fontFamily = _this.fontFace;
           //bbsCore.view.cursorDiv.style.fontFamily = _this.fontFace;
           //bbsCore.view.wordtest.style.fontFamily = _this.fontFace;
@@ -631,6 +637,9 @@ bbsfoxPrefHandler.prototype={
           _this.updateEventPrefs([{key:'useHttpContextMenu', value:branch.getBoolPref(name)}]);
           */
           break;
+        case "EnableNotification":
+          _this.enableNotification=branch.getBoolPref(name);
+          break;
         case "NotifyWhenBackground":
           _this.notifyWhenBackground=branch.getBoolPref(name);
           break;
@@ -870,10 +879,10 @@ bbsfoxPrefHandler.prototype={
     },
     addToBlacklist: function(userId){
       if(this.branchName){
-        var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
+        var prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
         var _branch = prefService.getBranch(this.branchName);
 
-        var CiStr = Components.interfaces.nsISupportsString;
+        var CiStr = Ci.nsISupportsString;
         var blu = _branch.getComplexValue('BlacklistedUserIds', CiStr).data || '';
         if(blu != '') blu+='\n';
         blu += userId;
@@ -881,17 +890,17 @@ bbsfoxPrefHandler.prototype={
         this.listener.sendCoreCommand({command: "writePrefs",
                                      branchName: this.branchName,
                                      name: "BlacklistedUserIds",
-                                     vtype: Components.interfaces.nsIPrefBranch.PREF_STRING,
+                                     vtype: Ci.nsIPrefBranch.PREF_STRING,
                                      value: blu
                                      }, true);
       }
     },
     removeFromBlacklist: function(userId){
       if(this.branchName){
-        var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService);
+        var prefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
         var _branch = prefService.getBranch(this.branchName);
 
-        var CiStr = Components.interfaces.nsISupportsString;
+        var CiStr = Ci.nsISupportsString;
         var blu = _branch.getComplexValue('BlacklistedUserIds', CiStr).data || '';
         blu = blu.replace(/\r\n/g, '\r');
         blu = blu.replace(/\n/g, '\r');
@@ -910,7 +919,7 @@ bbsfoxPrefHandler.prototype={
         this.listener.sendCoreCommand({command: "writePrefs",
                                      branchName: this.branchName,
                                      name: "BlacklistedUserIds",
-                                     vtype: Components.interfaces.nsIPrefBranch.PREF_STRING,
+                                     vtype: Ci.nsIPrefBranch.PREF_STRING,
                                      value: blu
                                      }, true);
       }

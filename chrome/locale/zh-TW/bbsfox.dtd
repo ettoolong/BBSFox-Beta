@@ -275,6 +275,7 @@
 <!ENTITY options_needGrowl1.label "您可能需要安裝">
 <!ENTITY options_needGrowl2.label "Growl">
 <!ENTITY options_needGrowl3.label "才能使此功能正常使用">
+<!ENTITY options_enablenotification.label "啟用來訊通知">
 <!ENTITY options_notifywhenbackground.label "只有當BBS頁面不是當前的頁面才產生通知">
 <!ENTITY options_notifybysound.label "聲音通知">
 <!ENTITY options_notifybymessage.label "視窗右下角訊息">

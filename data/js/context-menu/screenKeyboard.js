@@ -1,10 +1,10 @@
 self.on("context", function (node) {
-  if(!unsafeWindow.bbsfox) {
+  if(!window.bbsfox) {
     return false;
   }
-  return unsafeWindow.bbsfox.prefs.screenKeyboardMenu && !unsafeWindow.bbsfox.prefs.status.screenKeyboardOpened;
+  return window.bbsfox.prefs.screenKeyboardMenu && !window.bbsfox.prefs.status.screenKeyboardOpened;
 });
 
 self.on("click", function(node, data) {
-  unsafeWindow.bbsfox.overlaycmd.exec({command:"openSymbolInput"});
+  window.bbsfox.overlaycmd.exec({command:"openSymbolInput"});
 });

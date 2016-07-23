@@ -1,7 +1,7 @@
 // Coding-style-guide
 // https://github.com/mozilla/addon-sdk/wiki/Coding-style-guide
 
-let {components, Cu, Cc, Ci, Cm, Cr} = require("chrome");
+let {Cc, Ci} = require("chrome");
 let {modelFor} = require("sdk/model/core");
 let {viewFor} = require("sdk/view/core");
 
@@ -21,17 +21,18 @@ let aboutPage;
 let notifications = require("sdk/notifications");
 let soundService = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
 
-let { bbsfoxAPI } = require("./bbsfox-api.js");
-let { BBSFoxAbout } = require("./bbsfox-about.js");
+let bbsfoxAPI = require("./bbsfox-api.js");
+let bbsfoxAbout = require("./bbsfox-about.js");
+let bbsfoxBg = require("./bbsfox-bg.js");
 
 // preferences page - start
-sp.on("openPrefsTab", function() {
+sp.on("openPrefsTab", () => {
   // open XUL windows for preferences page.
   // need porting preferences page to pure HTML later.
   let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
   let ww = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
   let existing = wm.getMostRecentWindow("bbsfox:options");
-  if (existing){
+  if (existing) {
     try{
       existing.focus();
     }
@@ -64,15 +65,15 @@ sp.on("openPrefsTab", function() {
   // });
 });
 
-sp.on("openUserManual", function() {
+sp.on("openUserManual", () => {
   tabs.open({
-    url: 'chrome://bbsfox/locale/help.html'
+    url: "chrome://bbsfox/locale/help.html"
   });
 });
 
-sp.on("reportBug", function() {
+sp.on("reportBug", () => {
   tabs.open({
-    url: 'https://github.com/ettoolong/BBSFox-E10S/issues'
+    url: "https://github.com/ettoolong/BBSFox-E10S/issues"
   });
 });
 // preferences page - end
@@ -177,7 +178,6 @@ let bbstabs = {
   },
 
   openEasyReadingTab: function(htmlData, target) {
-      //var ios = Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService);
       let filetmp = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
       filetmp.append("easyreading.htm");
       filetmp.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0o666);
@@ -198,24 +198,23 @@ let bbstabs = {
     let chromeWindow = tabUtils.getOwnerWindow(xulTab);
     let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
 
-        var EMURL = "chrome://bbsfox/content/pushThread.xul";
-        var EMFEATURES = "chrome, dialog=yes, resizable=yes, modal=yes, centerscreen";
-        var retVals = { exec: false, pushText: data.pushText, lineLength: data.lineLength};
-        var retVals2 = [];
-        aDOMWindow.openDialog(EMURL, "", EMFEATURES, retVals, retVals2);
-        if(retVals.exec)
-        {
-          this.setBBSCmdEx({command:"sendPushThreadText",
-                            sendText:retVals2,
-                            temp:""
-                          }, target);
-        }
-        else
-        {
-          this.setBBSCmdEx({command:"sendPushThreadText",
-                            temp: retVals.pushText
-                          }, target);
-        }
+    let EMURL = "chrome://bbsfox/content/pushThread.xul";
+    let EMFEATURES = "chrome, dialog=yes, resizable=yes, modal=yes, centerscreen";
+    let retVals = { exec: false, pushText: data.pushText, lineLength: data.lineLength};
+    let retVals2 = [];
+    aDOMWindow.openDialog(EMURL, "", EMFEATURES, retVals, retVals2);
+    if(retVals.exec) {
+      this.setBBSCmdEx({command:"sendPushThreadText",
+                        sendText:retVals2,
+                        temp:""
+                      }, target);
+    }
+    else
+    {
+      this.setBBSCmdEx({command:"sendPushThreadText",
+                        temp: retVals.pushText
+                      }, target);
+    }
   },
 
   showNotifyMessage: function(data, target){
@@ -231,7 +230,7 @@ let bbstabs = {
       msg.onClick =function () {
         bbstabs.setTabFocus(target);
         if(data.replyString) {
-          bbstabs.setBBSCmdEx({command:'sendText', text: data.replyString}, target);
+          bbstabs.setBBSCmdEx({command:"sendText", text: data.replyString}, target);
         }
       }
     }
@@ -352,29 +351,31 @@ let bbstabs = {
   },
 
   setBBSCmdEx: function(commandSet, target) {
-    //TODO: check current page is bbs page
-    //console.log('setBBSCmdEx');
     if(!target) {
       let tab = tabs.activeTab;
-      let xulTab = tabUtils.getTabForId(tab.id);
-      target = tabUtils.getBrowserForTab(xulTab);
-      //browserMM = document.defaultView.gBrowser.selectedBrowser.messageManager; //TODO: need check this.
+      if(this.urlCheck.test(tab.url)) { // telnet:// or ssh://
+        let xulTab = tabUtils.getTabForId(tab.id);
+        target = tabUtils.getBrowserForTab(xulTab);
+      }
     }
-    let browserMM = target.messageManager;
-    browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", commandSet);
+    if(target) {
+      let browserMM = target.messageManager;
+      browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", commandSet);
+    }
   },
 
   setBBSCmd: function(command, target) {
-    //TODO: check current page is bbs page
-    //console.log('setBBSCmd');
     if(!target) {
       let tab = tabs.activeTab;
-      let xulTab = tabUtils.getTabForId(tab.id);
-      target = tabUtils.getBrowserForTab(xulTab);
-      //browserMM = document.defaultView.gBrowser.selectedBrowser.messageManager; //TODO: need check this.
+      if(this.urlCheck.test(tab.url)) { // telnet:// or ssh://
+        let xulTab = tabUtils.getTabForId(tab.id);
+        target = tabUtils.getBrowserForTab(xulTab);
+      }
     }
-    let browserMM = target.messageManager;
-    browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", {command: command});
+    if(target) {
+      let browserMM = target.messageManager;
+      browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayCommand", {command: command});
+    }
   },
 
   setItemVisible: function(doc, id, visible, checkHidden) {
@@ -410,9 +411,6 @@ let bbstabs = {
                    ["doPageUp","doPageDown"],
                    ["prevousThread","nextThread"],
                    ["doHome","doEnd"]];
-    let actionMapping = {
-
-    };
 
     let mouseWheelFunc = [eventPrefs.mouseWheelFunc1,
                           eventPrefs.mouseWheelFunc2,
@@ -453,7 +451,7 @@ let bbstabs = {
   },
 
   mouse_scroll_e10s: function (event) {
-    if(event.target.tagName!="tabbrowser" || event.target.getAttribute('id') != "content") {
+    if(event.target.tagName!="tabbrowser" || event.target.getAttribute("id") != "content") {
       return;
     }
     let tab = event.target.mCurrentTab; //tabUtils.getTabForBrowser(event.target);
@@ -650,7 +648,6 @@ let bbstabs = {
     let sortItem = event.target.getAttribute("sortItem");
     if(!sortItem) {
       //console.log('sort context menu items');
-      event.target.setAttribute("sortItem", "true");
       let menuItems = event.target.childNodes;
       // sort items - start
       // only need do this once.
@@ -680,11 +677,15 @@ let bbstabs = {
           moveNodes[value] = menuItem;
         }
       }
-      event.target.insertBefore(moveNodes["bbsfox_menu-ansiCopy"], refNodes["context-copy"].next);
-      event.target.insertBefore(moveNodes["bbsfox_menu-openAllLink"], refNodes["context-selectall"].next);
-      event.target.insertBefore(moveNodes["bbsfox_menu-viewimage"], refNodes["context-viewimage"].next);
-      moveNodes["bbsfox_menu-viewimage"].setAttribute("label", refNodes["context-viewimage"].label);
-      moveNodes["bbsfox_menu-viewimage"].setAttribute("accesskey", refNodes["context-viewimage"].accesskey);
+      //TODO: TypeError: Argument 1 of Node.insertBefore is not an object.
+      if(moveNodes["bbsfox_menu-ansiCopy"] && moveNodes["bbsfox_menu-openAllLink"] && moveNodes["bbsfox_menu-viewimage"] ) {
+        event.target.setAttribute("sortItem", "true");
+        event.target.insertBefore(moveNodes["bbsfox_menu-ansiCopy"], refNodes["context-copy"].next);
+        event.target.insertBefore(moveNodes["bbsfox_menu-openAllLink"], refNodes["context-selectall"].next);
+        event.target.insertBefore(moveNodes["bbsfox_menu-viewimage"], refNodes["context-viewimage"].next);
+        moveNodes["bbsfox_menu-viewimage"].setAttribute("label", refNodes["context-viewimage"].label);
+        moveNodes["bbsfox_menu-viewimage"].setAttribute("accesskey", refNodes["context-viewimage"].accesskey);
+      }
       // sort items - end
     }
     //context-paste
@@ -797,19 +798,19 @@ let bbstabs = {
   },
 
   init: function() {
-    this.eventMap.set('DOMMouseScroll-E10S', this.mouse_scroll_e10s.bind(this));
-    this.eventMap.set('DOMMouseScroll', this.mouse_scroll.bind(this));
-    this.eventMap.set('contextmenu', this.mouse_menu.bind(this));
-    this.eventMap.set('mousedown', this.mouse_down.bind(this));
-    this.eventMap.set('mouseup', this.mouse_up.bind(this));
-    this.eventMap.set('keypress', this.key_press.bind(this));
+    this.eventMap.set("DOMMouseScroll-E10S", this.mouse_scroll_e10s.bind(this));
+    this.eventMap.set("DOMMouseScroll", this.mouse_scroll.bind(this));
+    this.eventMap.set("contextmenu", this.mouse_menu.bind(this));
+    this.eventMap.set("mousedown", this.mouse_down.bind(this));
+    this.eventMap.set("mouseup", this.mouse_up.bind(this));
+    this.eventMap.set("keypress", this.key_press.bind(this));
 
-    this.eventMap.set('caContextMenu-ps', this.bbsfoxContextMenuShowing.bind(this));
-    this.eventMap.set('caContextMenu-ps2', this.bbsfoxContextMenuShown.bind(this));
-    this.eventMap.set('caContextMenu-ph', this.bbsfoxContextMenuHidden.bind(this));
+    this.eventMap.set("caContextMenu-ps", this.bbsfoxContextMenuShowing.bind(this));
+    this.eventMap.set("caContextMenu-ps2", this.bbsfoxContextMenuShown.bind(this));
+    this.eventMap.set("caContextMenu-ph", this.bbsfoxContextMenuHidden.bind(this));
 
-    this.eventMap.set('tabAttrModified', this.tabAttrModified.bind(this));
-    this.eventMap.set('handleCoreCommand', this.handleCoreCommand.bind(this));
+    this.eventMap.set("tabAttrModified", this.tabAttrModified.bind(this));
+    this.eventMap.set("handleCoreCommand", this.handleCoreCommand.bind(this));
   },
 
   onWinOpen: function(chromeWindow) {
@@ -821,26 +822,26 @@ let bbstabs = {
     if(chromeBrowser) {
       chromeWindow.BBSFox_API = bbsfoxAPI;
       if(useRemoteTabs)
-        chromeWindow.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
+        chromeWindow.addEventListener("DOMMouseScroll", this.eventMap.get("DOMMouseScroll-E10S"), true);
       else
-        chromeWindow.addEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
+        chromeWindow.addEventListener("DOMMouseScroll", this.eventMap.get("DOMMouseScroll"), true);
 
-      chromeBrowser.addEventListener("contextmenu", this.eventMap.get('contextmenu'), true);
-      chromeBrowser.addEventListener("mousedown", this.eventMap.get('mousedown'), true);
-      chromeBrowser.addEventListener('mouseup', this.eventMap.get('mouseup'), true);
-      chromeBrowser.addEventListener("keypress", this.eventMap.get('keypress'), true);
-      chromeBrowser.tabContainer.addEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
+      chromeBrowser.addEventListener("contextmenu", this.eventMap.get("contextmenu"), true);
+      chromeBrowser.addEventListener("mousedown", this.eventMap.get("mousedown"), true);
+      chromeBrowser.addEventListener("mouseup", this.eventMap.get("mouseup"), true);
+      chromeBrowser.addEventListener("keypress", this.eventMap.get("keypress"), true);
+      chromeBrowser.tabContainer.addEventListener("TabAttrModified", this.eventMap.get("tabAttrModified"), true);
 
       let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
       aDOMWindow.messageManager.loadFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js", true);
-      aDOMWindow.messageManager.addMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get('handleCoreCommand') );
+      aDOMWindow.messageManager.addMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get("handleCoreCommand") );
 
-      let contentAreaContextMenu = aDOMWindow.document.getElementById('contentAreaContextMenu');
+      let contentAreaContextMenu = aDOMWindow.document.getElementById("contentAreaContextMenu");
 
       if(contentAreaContextMenu) {
-        contentAreaContextMenu.addEventListener('popupshowing', this.eventMap.get('caContextMenu-ps'), false);
-        contentAreaContextMenu.addEventListener('popupshown', this.eventMap.get('caContextMenu-ps2'), false);
-        contentAreaContextMenu.addEventListener('popuphidden', this.eventMap.get('caContextMenu-ph'), false);
+        contentAreaContextMenu.addEventListener("popupshowing", this.eventMap.get("caContextMenu-ps"), false);
+        contentAreaContextMenu.addEventListener("popupshown", this.eventMap.get("caContextMenu-ps2"), false);
+        contentAreaContextMenu.addEventListener("popuphidden", this.eventMap.get("caContextMenu-ph"), false);
       }
     }
   },
@@ -853,26 +854,26 @@ let bbstabs = {
     if(chromeBrowser) {
       delete chromeWindow.BBSFox_API;
       if(useRemoteTabs)
-        chromeWindow.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll-E10S'), true);
+        chromeWindow.removeEventListener("DOMMouseScroll", this.eventMap.get("DOMMouseScroll-E10S"), true);
       else
-        chromeWindow.removeEventListener('DOMMouseScroll', this.eventMap.get('DOMMouseScroll'), true);
+        chromeWindow.removeEventListener("DOMMouseScroll", this.eventMap.get("DOMMouseScroll"), true);
 
-      chromeBrowser.removeEventListener("contextmenu", this.eventMap.get('contextmenu'), true);
-      chromeBrowser.removeEventListener("mousedown", this.eventMap.get('mousedown'), true);
-      chromeBrowser.removeEventListener('mouseup', this.eventMap.get('mouseup'), true);
-      chromeBrowser.removeEventListener("keypress", this.eventMap.get('keypress'), true);
-      chromeBrowser.tabContainer.removeEventListener('TabAttrModified', this.eventMap.get('tabAttrModified'), true);
+      chromeBrowser.removeEventListener("contextmenu", this.eventMap.get("contextmenu"), true);
+      chromeBrowser.removeEventListener("mousedown", this.eventMap.get("mousedown"), true);
+      chromeBrowser.removeEventListener("mouseup", this.eventMap.get("mouseup"), true);
+      chromeBrowser.removeEventListener("keypress", this.eventMap.get("keypress"), true);
+      chromeBrowser.tabContainer.removeEventListener("TabAttrModified", this.eventMap.get("tabAttrModified"), true);
 
       let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-      aDOMWindow.messageManager.removeMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get('handleCoreCommand') );
+      aDOMWindow.messageManager.removeMessageListener("bbsfox@ettoolong:bbsfox-coreCommand",  this.eventMap.get("handleCoreCommand") );
       aDOMWindow.messageManager.removeDelayedFrameScript("chrome://bbsfox/content/bbsfox_frame_script.js");
 
-      let contentAreaContextMenu = aDOMWindow.document.getElementById('contentAreaContextMenu');
+      let contentAreaContextMenu = aDOMWindow.document.getElementById("contentAreaContextMenu");
 
       if(contentAreaContextMenu) {
-        contentAreaContextMenu.removeEventListener('popupshowing', this.eventMap.get('caContextMenu-ps'), false);
-        contentAreaContextMenu.removeEventListener('popupshown', this.eventMap.get('caContextMenu-ps2'), false);
-        contentAreaContextMenu.removeEventListener('popuphidden', this.eventMap.get('caContextMenu-ph'), false);
+        contentAreaContextMenu.removeEventListener("popupshowing", this.eventMap.get("caContextMenu-ps"), false);
+        contentAreaContextMenu.removeEventListener("popupshown", this.eventMap.get("caContextMenu-ps2"), false);
+        contentAreaContextMenu.removeEventListener("popuphidden", this.eventMap.get("caContextMenu-ph"), false);
       }
     }
   },
@@ -888,6 +889,7 @@ let bbstabs = {
     });
   },
 
+  /*
   getContentScript: function(prefName, command) {
     let action = "";
     if(!command) {
@@ -908,14 +910,15 @@ let bbstabs = {
       "});"
     ];
     return cs.join("");
-  }
+  }*/
+
 };
 
-windows.on("open" , function (win){
+windows.on("open" ,  win => {
   bbstabs.onWinOpen( viewFor(win) );
 });
 
-tabs.on('open', tab => {
+tabs.on("open", tab => {
   bbstabs.onTabOpen(tab);
 });
 
@@ -923,7 +926,7 @@ tabs.on('open', tab => {
 cm.Item({
   label: _("cm_ansiCopy"),
   context: cm.SelectionContext(),
-  contentScript: bbstabs.getContentScript("ansiCopyMenu", "doCopyAnsi"),
+  contentScriptFile: data.url("js/context-menu/ansiCopy.js"),
   data: "bbsfox_menu-ansiCopy"
 });
 
@@ -932,7 +935,7 @@ cm.Item({
   label: _("cm_openAllLink"),
   contentScriptFile: data.url("js/context-menu/openAllLink.js"),
   data: "bbsfox_menu-openAllLink",
-  onMessage: function() {
+  onMessage: () => {
     bbstabs.setBBSCmd("doOpenAllLink");
   }
 });
@@ -942,7 +945,7 @@ cm.Item({
   label: _("cm_viewimage"),
   contentScriptFile: data.url("js/context-menu/viewImage.js"),
   data: "bbsfox_menu-viewimage",
-  onMessage: function() {
+  onMessage: () => {
     bbstabs.openNewTabs([bbstabs.imageSrc], null, "UTF-8", false);
   }
 });
@@ -958,10 +961,9 @@ cm.Item({
     //let cmitems = winUtils.getMostRecentBrowserWindow().document.querySelectorAll(".addon-context-menu-item[value='bbsfox_menu-previewPicture']");
     return (context.linkURL && !(context.linkURL.search(/\.(bmp|gif|jpe?g|png)$/i) === -1));
   }),
-  contentScript: bbstabs.getContentScript("previewPictureMenu"),
-  //contentScriptFile: data.url("js/context-menu/previewPicture.js"),
+  contentScriptFile: data.url("js/context-menu/previewPicture.js"),
   data: "bbsfox_menu-previewPicture",
-  onMessage: function() {
+  onMessage: () => {
     bbstabs.setBBSCmdEx({command:"previewPicture", pictureUrl: bbstabs.contextLink});
   }
 });
@@ -976,10 +978,9 @@ cm.Item({
     let vtRegex3 = /(http:\/\/www\.ustream\.tv\/recorded\/([0-9]{5,10}))/i;
     return (context.linkURL && ( vtRegex.test(context.linkURL) || vtRegex2.test(context.linkURL) || vtRegex3.test(context.linkURL)));
   }),
-  contentScript: bbstabs.getContentScript("embeddedPlayerMenu"),
-  //contentScriptFile: data.url("js/context-menu/embeddedPlayer.js"),
+  contentScriptFile: data.url("js/context-menu/embeddedPlayer.js"),
   data: "bbsfox_menu-embeddedPlayer",
-  onMessage: function() {
+  onMessage: () => {
     bbstabs.setBBSCmdEx({command:"openPlayerWindowEx", videoUrl: bbstabs.contextLink});
   }
 });
@@ -990,7 +991,6 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  //contentScript: bbstabs.getContentScript("ansiColorToolMenu", "openAnsiColorTool"),
   contentScriptFile: data.url("js/context-menu/ansiColorTool.js"),
   data: "bbsfox_menu-ansiColorTool"
 });
@@ -1001,7 +1001,6 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  //contentScript: bbstabs.getContentScript("screenKeyboardMenu", "openSymbolInput"),
   contentScriptFile: data.url("js/context-menu/screenKeyboard.js"),
   data: "bbsfox_menu-screenKeyboard"
 });
@@ -1011,27 +1010,18 @@ cm.Item({
   label: _("cm_addTrack"),
   context: cm.SelectionContext(),
   contentScriptFile: data.url("js/context-menu/trackAdd.js"),
-  data: "bbsfox_menu-addTrack",
-  onMessage: function() {
-    bbstabs.setBBSCmd("doAddTrack");
-  }
+  data: "bbsfox_menu-addTrack"
 });
 cm.Item({
   label: _("cm_delTrack"),
   context: cm.SelectionContext(),
   contentScriptFile: data.url("js/context-menu/trackDel.js"),
-  data: "bbsfox_menu-delTrack",
-  onMessage: function() {
-    bbstabs.setBBSCmd("doDelTrack");
-  }
+  data: "bbsfox_menu-delTrack"
 });
 cm.Item({
   label: _("cm_clearTrack"),
   contentScriptFile: data.url("js/context-menu/trackClear.js"),
-  data: "bbsfox_menu-clearTrack",
-  onMessage: function() {
-    bbstabs.setBBSCmd("doClearTrack");
-  }
+  data: "bbsfox_menu-clearTrack"
 });
 
 //context-menu-item-mouseBrowsing
@@ -1040,7 +1030,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("mouseBrowseMenu", "switchMouseBrowsing"),
+  contentScriptFile: data.url("js/context-menu/mouseBrowsing.js"),
   data: "bbsfox_menu-mouseBrowsing"
 });
 
@@ -1051,10 +1041,7 @@ cm.Item({
     return !context.selectionText;
   }),
   contentScriptFile: data.url("js/context-menu/switchBgDisplay.js"),
-  data: "bbsfox_menu-BgDisplay",
-  onMessage: function() {
-    bbstabs.setBBSCmd("switchBgDisplay");
-  }
+  data: "bbsfox_menu-BgDisplay"
 });
 
 //context-menu-item-easyRead
@@ -1063,7 +1050,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("easyReadingMenu", "easyReading"),
+  contentScriptFile: data.url("js/context-menu/easyRead.js"),
   data: "bbsfox_menu-easyRead"
 });
 
@@ -1073,7 +1060,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("pushThreadMenu", "pushThread"),
+  contentScriptFile: data.url("js/context-menu/pushThread.js"),
   data: "bbsfox_menu-pushThread"
 });
 
@@ -1083,7 +1070,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("pushThreadMenu", "openThreadUrl"),
+  contentScriptFile: data.url("js/context-menu/openThreadUrl.js"),
   data: "bbsfox_menu-openThreadUrl"
 });
 
@@ -1093,7 +1080,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("changeColorTableMenu", "changeColorTable"),
+  contentScriptFile: data.url("js/context-menu/changeColorTable.js"),
   data: "bbsfox_menu-changeColorTable"
 });
 
@@ -1103,18 +1090,18 @@ cm.Menu({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("downloadPostMenu"),
+  contentScriptFile: data.url("js/context-menu/downloadPost.js"),
   data: "bbsfox_menu-downloadPost",
   items: [
     cm.Item({ label: _("cm_downText"), data: "bbsfox_menu-downloadText" }),
     cm.Item({ label: _("cm_downAnsi"), data: "bbsfox_menu-downloadAnsi" }),
     cm.Item({ label: _("cm_downHtml"), data: "bbsfox_menu-downloadHtml" })
   ],
-  onMessage: function(data) {
+  onMessage: data => {
     let mode = 0;
-    if(data === 'bbsfox_menu-downloadText') mode = 0;
-    else if(data === 'bbsfox_menu-downloadAnsi') mode = 1;
-    else if(data === 'bbsfox_menu-downloadHtml') mode = 2;
+    if(data === "bbsfox_menu-downloadText") mode = 0;
+    else if(data === "bbsfox_menu-downloadAnsi") mode = 1;
+    else if(data === "bbsfox_menu-downloadHtml") mode = 2;
     bbstabs.setBBSCmdEx({command:"doDownloadPost", downloadColor: mode});
   }
 });
@@ -1125,7 +1112,7 @@ cm.Item({
   context: cm.PredicateContext(function(context){
     return !context.selectionText;
   }),
-  contentScript: bbstabs.getContentScript("fileIoMenu", "doLoadFile"),
+  contentScriptFile: data.url("js/context-menu/loadFile.js"),
   data: "bbsfox_menu-fileIo"
 });
 
@@ -1137,10 +1124,7 @@ cm.Item({
     data.url("js/stringutil.js"),
     data.url("js/context-menu/blacklistAdd.js")
   ],
-  data: "bbsfox_menu-addToBlacklist",
-  onMessage: function() {
-    bbstabs.setBBSCmd("addToBlacklist");
-  }
+  data: "bbsfox_menu-addToBlacklist"
 });
 
 //context-menu-item-removeFromBlacklist
@@ -1151,10 +1135,7 @@ cm.Item({
     data.url("js/stringutil.js"),
     data.url("js/context-menu/blacklistDel.js")
   ],
-  data: "bbsfox_menu-removeFromBlacklist",
-  onMessage: function() {
-    bbstabs.setBBSCmd("removeFromBlacklist");
-  }
+  data: "bbsfox_menu-removeFromBlacklist"
 });
 
 //
@@ -1163,36 +1144,36 @@ function initDefaultPrefs () {
   //default site setting
   let defaultPrefs = Cc["@mozilla.org/preferences-service;1"].
                       getService(Ci.nsIPrefService).
-                      getDefaultBranch('extensions.bbsfox2.');
+                      getDefaultBranch("extensions.bbsfox2.");
   for(let i in bbsfoxPrefs.sitePrefs) {
     let value = bbsfoxPrefs.sitePrefs[i];
-    if( typeof value === 'boolean') {
-      defaultPrefs.setBoolPref('host_default.' + i, value);
+    if( typeof value === "boolean") {
+      defaultPrefs.setBoolPref("host_default." + i, value);
     }
-    else if( typeof value === 'number') {
-      defaultPrefs.setIntPref('host_default.' + i, value);
+    else if( typeof value === "number") {
+      defaultPrefs.setIntPref("host_default." + i, value);
     }
-    else if( typeof value === 'string'){
+    else if( typeof value === "string"){
       let nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
       nsIString.data = value;
-      defaultPrefs.setComplexValue('host_default.' + i, Ci.nsISupportsString, nsIString);
+      defaultPrefs.setComplexValue("host_default." + i, Ci.nsISupportsString, nsIString);
     }
   }
 
   //global setting
   let globalPrefs = Cc["@mozilla.org/preferences-service;1"].
                getService(Ci.nsIPrefService).
-               getDefaultBranch('extensions.');
+               getDefaultBranch("extensions.");
 
   for(let i in bbsfoxPrefs.globalPrefs) {
     let value = bbsfoxPrefs.globalPrefs[i];
-    if( typeof value === 'boolean') {
+    if( typeof value === "boolean") {
       globalPrefs.setBoolPref(i, value);
     }
-    else if( typeof value === 'number') {
+    else if( typeof value === "number") {
       globalPrefs.setIntPref(i, value);
     }
-    else if( typeof value === 'string'){
+    else if( typeof value === "string"){
       let nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
       nsIString.data = value;
       globalPrefs.setComplexValue(i, Ci.nsISupportsString, nsIString);
@@ -1221,14 +1202,16 @@ exports.main = function (options, callbacks) {
   }
   // Init event listener - end
 
-  if (options.loadReason === 'install' || options.loadReason === 'startup') {
+  if (options.loadReason === "install" || options.loadReason === "startup") {
     //TODO: set default pref value
-  } else if (options.loadReason === 'upgrade') {
+  }
+  if (options.loadReason === "install" || options.loadReason === "upgrade") {
     //TODO: show version info
     //TODO: update pref value, remove unused pref
   }
 
-  aboutPage = new BBSFoxAbout();
+  aboutPage = new bbsfoxAbout.Page();
+  bbsfoxBg.mount();
 
   Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster)
     .broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-addonCommand", {command: options.loadReason});
@@ -1248,6 +1231,7 @@ exports.onUnload = function (reason) {
 
     // unregister about:bbsfox page
     aboutPage.unregister();
+    bbsfoxBg.unmount();
 
     // notify all telnet page
     Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster)

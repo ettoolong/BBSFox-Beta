@@ -4,12 +4,13 @@
 //console.log('global frame-script.js');
 const { utils: Cu, classes: Cc, interfaces: Ci, manager: Cm, results: Cr } = Components;
 
-var regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
-             .isContractIDRegistered('@mozilla.org/network/protocol;1?name=telnet') ? false : true;
+let regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+             .isContractIDRegistered("@mozilla.org/network/protocol;1?name=telnet") ? false : true;
 
-var regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
-             .isContractIDRegistered('@mozilla.org/network/protocol;1?name=ssh') ? false : true;
+let regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+             .isContractIDRegistered("@mozilla.org/network/protocol;1?name=ssh") ? false : true;
 
+let factorys = {};
 function setProtocol( enable ) {
 
   let createFactory = function () {
@@ -26,8 +27,8 @@ function setProtocol( enable ) {
 
         register: function register(targetConstructor) {
           this._targetConstructor = targetConstructor;
-          var proto = targetConstructor.prototype;
-          var registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
+          let proto = targetConstructor.prototype;
+          let registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
           if(registrar.isContractIDRegistered(proto.contractID) ) {
 
           } else {
@@ -36,8 +37,8 @@ function setProtocol( enable ) {
         },
 
         unregister: function unregister() {
-          var proto = this._targetConstructor.prototype;
-          var registrar = Cm.QueryInterface(Components.interfaces.nsIComponentRegistrar);
+          let proto = this._targetConstructor.prototype;
+          let registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
           registrar.unregisterFactory(proto.classID, this);
           this._targetConstructor = null;
         },
@@ -60,29 +61,21 @@ function setProtocol( enable ) {
 
   if(enable) {
     Cu.import("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
-    createFactory().register(TelnetProtocol);
+    factorys.telnet = createFactory();
+    factorys.telnet.register(TelnetProtocol);
 
     Cu.import("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
-    createFactory().register(SshProtocol);
+    factorys.ssh = createFactory();
+    factorys.ssh.register(SshProtocol);
   } else {
-    //how to unregister protocol?
+    factorys.telnet.unregister();
+    delete factorys.telnet;
+    Cu.unload("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
+
+    factorys.ssh.unregister();
+    delete factorys.ssh;
+    Cu.unload("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
   }
-
-  {
-    //TODO: need fix, if bbsfoxBg directory not exists!
-    Cu.import("resource://gre/modules/osfile.jsm");
-    let ios = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-    let resource = ios.getProtocolHandler("resource").QueryInterface(Ci.nsIResProtocolHandler);
-    let dir = OS.Path.join(OS.Constants.Path.profileDir, 'bbsfoxBg');
-    try{
-      OS.File.makeDir(dir);
-    } catch(ex) {
-
-    }
-    let alias = ios.newURI( OS.Path.toFileURI( OS.Path.join(OS.Constants.Path.profileDir, 'bbsfoxBg', 'bbsfox') ), null, null);
-    resource.setSubstitution("bbsfox2", alias);
-  }
-
 }
 
 if(regSsh || regTelnet) {

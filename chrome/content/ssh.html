@@ -16,6 +16,9 @@
     <link rel="stylesheet" type="text/css" id="ColorCSS" href="chrome://bbsfox/skin/color.css"/>
     <link rel="stylesheet" type="text/css" id="ColorFix" href="chrome://bbsfox/skin/color-normal.css"/>
     <title></title>
+    <script type="text/javascript" src="chrome://bbsfox/content/sshDef.js"></script>
+    <script type="text/javascript" src="chrome://bbsfox/content/mainpage.js"></script>
+
     <!--SSH script start-->
     <script type="text/javascript" src="chrome://bbsfox/content/paramikojs/common.js"></script>
 
@@ -67,7 +70,6 @@
     <script type="text/javascript" src="chrome://bbsfox/content/paramikojs/win_pageant.js"></script>
     <!--SSH script end-->
 
-    <script type="text/javascript" src="chrome://bbsfox/content/mainpage2.js"></script>
     <script type="text/javascript" src="chrome://bbsfox/content/stringutil.js"></script>
     <script type="text/javascript" src="chrome://bbsfox/content/aidhandler.js"></script>
     <script type="text/javascript" src="chrome://bbsfox/content/symbolTable.js"></script>
@@ -113,7 +115,8 @@
       </div>
 
     </div> <!--BBSWindow end-->
-    <div id="BBSFoxFontTest" style="left:-10000px; top:-10000px;position: absolute;overflow: hidden;"></div>
+    <div id="SpaceCharacterTest" class="testElem">&#32;</div>
+    <div id="NbspCharacterTest" class="testElem">&nbsp;</div>
     <div id="hideobj" style="display: none;">
       <span id="cmdHandler"></span>
       <div id="TrackKeyWordList"></div>

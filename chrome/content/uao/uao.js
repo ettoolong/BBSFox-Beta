@@ -1,19 +1,19 @@
 // Javascript module for Unicode-at-on support
 // Reference: http://moztw.org/docs/big5/
 // http://moztw.org/docs/big5/table/uao250-u2b.txt
-
+const { classes: Cc, interfaces: Ci } = Components;
 var EXPORTED_SYMBOLS = ["uaoConv"];
 
 var uaoConv = {
     u2bTab: '',
     b2uTab: '',
-    conv: Components.classes["@mozilla.org/intl/utf8converterservice;1"].getService(Components.interfaces.nsIUTF8ConverterService),
+    conv: Cc["@mozilla.org/intl/utf8converterservice;1"].getService(Ci.nsIUTF8ConverterService),
 
     init_u2b: function () {
         // load U2B table
-        var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                            .getService(Components.interfaces.nsIIOService);
-        var ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
+        var ioService = Cc["@mozilla.org/network/io-service;1"]
+                            .getService(Ci.nsIIOService);
+        var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
         var sp = ssm.getSystemPrincipal();
         var channel = ioService.newChannel2("chrome://bbsfox/content/uao/u2b.tab", //aSpec
                            null, //aOriginCharset
@@ -21,12 +21,12 @@ var uaoConv = {
                            null, //aLoadingNode
                            sp, //aLoadingPrincipal
                            null, //aTriggeringPrincipal
-                           Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-                           Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+                           Ci.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+                           Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
 
         var ins = channel.open();
-        var bins = Components.classes["@mozilla.org/binaryinputstream;1"].
-                       createInstance(Components.interfaces.nsIBinaryInputStream);
+        var bins = Cc["@mozilla.org/binaryinputstream;1"].
+                       createInstance(Ci.nsIBinaryInputStream);
         bins.setInputStream(ins);
         while(bins.available())
             this.u2bTab += bins.readBytes(bins.available());
@@ -35,9 +35,9 @@ var uaoConv = {
 
     init_b2u: function () {
         // load U2B table
-        var ioService = Components.classes["@mozilla.org/network/io-service;1"]
-                            .getService(Components.interfaces.nsIIOService);
-        var ssm = Components.classes["@mozilla.org/scriptsecuritymanager;1"].getService(Components.interfaces.nsIScriptSecurityManager);
+        var ioService = Cc["@mozilla.org/network/io-service;1"]
+                            .getService(Ci.nsIIOService);
+        var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
         var sp = ssm.getSystemPrincipal();
         var channel = ioService.newChannel2("chrome://bbsfox/content/uao/b2u.tab", //aSpec
                            null, //aOriginCharset
@@ -45,12 +45,12 @@ var uaoConv = {
                            null, //aLoadingNode
                            sp, //aLoadingPrincipal
                            null, //aTriggeringPrincipal
-                           Components.interfaces.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
-                           Components.interfaces.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+                           Ci.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+                           Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
 
         var ins = channel.open();
-        var bins = Components.classes["@mozilla.org/binaryinputstream;1"].
-                       createInstance(Components.interfaces.nsIBinaryInputStream);
+        var bins = Cc["@mozilla.org/binaryinputstream;1"].
+                       createInstance(Ci.nsIBinaryInputStream);
         bins.setInputStream(ins);
         while(bins.available())
             this.b2uTab += bins.readBytes(bins.available());
