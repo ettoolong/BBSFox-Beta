@@ -1,2 +1,2 @@
 # BBSFox-Beta
-BBSFox Beta Ver.
+BBSFox Beta Version
