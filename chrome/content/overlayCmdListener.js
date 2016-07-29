@@ -81,6 +81,9 @@ BBSOverlayCmdListener.prototype={
           case "setInputAreaFocus":
             bbscore.setInputAreaFocus();
             break;
+          case "updateCursor":
+            bbscore.view.updateCursorPos();
+            break;
           case "sendCharCode":
             bbscore.conn.send(String.fromCharCode(data.charCode));
             break;

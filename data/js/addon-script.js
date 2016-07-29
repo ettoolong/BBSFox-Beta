@@ -83,6 +83,11 @@ let bbstabs = {
   eventMap: new Map(),
   urlCheck : /(^(telnet|ssh):\/\/)/i,
   os: system.platform,
+  doDOMMouseScroll: false,
+  globalMouseRBtnDown: false,
+  mouseRBtnDown: false,
+  globalMouseLBtnDown: false,
+  mouseLBtnDown: false,
 
   handleCoreCommand: function(message) {
 
@@ -110,8 +115,7 @@ let bbstabs = {
         //tabUtils.getTabForBrowser( message.target ).eventPrefs;
         let tab = tabUtils.getTabForBrowser( message.target );
         if(tab) {
-         delete tab.eventPrefs;
-         delete tab.eventStatus;
+          delete tab.eventPrefs;
         }
         break;
       }
@@ -401,9 +405,6 @@ let bbstabs = {
       return;
     }
 
-    if(!tab.eventStatus) {
-      tab.eventStatus = {doDOMMouseScroll: false};
-    }
     let browser = e10s ? event.target.mCurrentBrowser : null;
 
     let actions = [["",""],
@@ -420,12 +421,15 @@ let bbstabs = {
 
     if(mouseWheelFunc[0] || mouseWheelFunc[1] || mouseWheelFunc[2]) {
 
-      let eventStatus = tab.eventStatus;
+      //check bbstabs.globalMouseRBtnDown && bbstabs.globalMouseLBtnDown
+      if(bbstabs.globalMouseRBtnDown !== bbstabs.mouseRBtnDown)
+        return;
+
       //let action = actions
       let mouseButton;
-      if(eventStatus.mouseRBtnDown)
+      if(bbstabs.mouseRBtnDown)
         mouseButton = 1;
-      else if(eventStatus.mouseLBtnDown)
+      else if(bbstabs.mouseLBtnDown)
         mouseButton = 2;
       else
         mouseButton = 0;
@@ -436,10 +440,10 @@ let bbstabs = {
         event.stopPropagation();
         event.preventDefault();
 
-        if(eventStatus.mouseRBtnDown) {//prevent context menu popup
-          eventStatus.doDOMMouseScroll = true;
+        if(bbstabs.mouseRBtnDown) {//prevent context menu popup
+          bbstabs.doDOMMouseScroll = true;
         }
-        if(eventStatus.mouseLBtnDown) {
+        if(bbstabs.mouseLBtnDown) {
           //TODO: fix this, tell content page skip this mouse click.
           if(eventPrefs.useMouseBrowsing) {
             this.setBBSCmd("skipMouseClick", browser);
@@ -481,21 +485,17 @@ let bbstabs = {
     if(!eventPrefs)
       return;
 
-    if(!xulTab.eventStatus)
-      xulTab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = xulTab.eventStatus;
-
     let mouseWheelFunc2 = (eventPrefs.mouseWheelFunc2 != 0);
     if(mouseWheelFunc2) {
 
-      if(eventStatus.doDOMMouseScroll) {
+      if(bbstabs.doDOMMouseScroll) {
         event.stopPropagation();
         event.preventDefault();
-        //eventStatus.doDOMMouseScroll = false;
+        //bbstabs.doDOMMouseScroll = false;
       } else {
         if(this.os == "winnt") {
           //do nothing...
-        } else if(eventStatus.mouseRBtnDown) {//if Linux or Mac, delay popup menu.
+        } else if(bbstabs.mouseRBtnDown) {//if Linux or Mac, delay popup menu.
           event.stopPropagation();
           event.preventDefault();
           return;
@@ -506,38 +506,34 @@ let bbstabs = {
   },
 
   mouse_down: function (event) {
-    //if(event.target.tagName !== "tabbrowser")
-    //  return;
-    //let tab = event.target.mCurrentTab;
+    if(event.button==2) {
+      bbstabs.globalMouseRBtnDown = true;
+    } else if(event.button==0) {
+      bbstabs.globalMouseLBtnDown = true;
+    }
+
     let tab = tabs.activeTab;
     let xulTab = tabUtils.getTabForId(tab.id);
+    let uri = tabUtils.getURI(xulTab);
+    if(!this.urlCheck.test(uri))
+      return;
 
-    if(!xulTab.eventStatus)
-      xulTab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = xulTab.eventStatus;
     if(event.button==2) {
-      eventStatus.mouseRBtnDown = true;
-      eventStatus.doDOMMouseScroll = false;
+      bbstabs.mouseRBtnDown = true;
+      bbstabs.doDOMMouseScroll = false;
     } else if(event.button==0) {
-      eventStatus.mouseLBtnDown = true;
+      bbstabs.mouseLBtnDown = true;
     }
   },
 
   mouse_up: function (event) {
-    //if(event.target.tagName !== "tabbrowser")
-    //  return;
-    //let tab = event.target.mCurrentTab;
-
-    let tab = tabs.activeTab;
-    let xulTab = tabUtils.getTabForId(tab.id);
-    if(!xulTab.eventStatus)
-      xulTab.eventStatus = {doDOMMouseScroll: false};
-    let eventStatus = xulTab.eventStatus;
-
-    if(event.button==2)
-      eventStatus.mouseRBtnDown = false;
-    else if(event.button==0)
-      eventStatus.mouseLBtnDown = false;
+    if(event.button==2) {
+      bbstabs.globalMouseRBtnDown = false;
+      bbstabs.mouseRBtnDown = false;
+    } else if(event.button==0) {
+      bbstabs.globalMouseLBtnDown = false;
+      bbstabs.mouseLBtnDown = false;
+    }
 
     let uri = tabUtils.getURI(xulTab);
     if(!this.urlCheck.test(uri))
@@ -553,7 +549,7 @@ let bbstabs = {
         if(this.os == "winnt") {
         //do nothing...
         } else {//if Linux or Mac, show popup menu.
-          if(!eventStatus.doDOMMouseScroll) {
+          if(!bbstabs.doDOMMouseScroll) {
             let browser = event.target.mCurrentBrowser;
             this.setBBSCmdEx({command:"contextmenu",
                               screenX:event.screenX,
@@ -788,13 +784,7 @@ let bbstabs = {
     let tabBrowser = tabUtils.getBrowserForTab(event.target);
     let browserMM = tabBrowser.messageManager;
     browserMM.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayEvent", {command:"update"});
-    /*
-    let xulTab = tabUtils.getTabForBrowser( tabBrowser );
-    let chromeWindow = tabUtils.getOwnerWindow(xulTab);
-    let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-    let useRemoteTabs = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor)
-     .getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsILoadContext).useRemoteTabs;
-    */
+    bbstabs.setBBSCmd("updateCursor");
   },
 
   init: function() {
