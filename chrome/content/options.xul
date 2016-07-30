@@ -1116,6 +1116,5 @@
   </vbox>
   <script type="application/x-javascript" src="chrome://bbsfox/content/browserutils.js"/>
   <script type="application/x-javascript" src="chrome://mozapps/content/preferences/fontbuilder.js"/>
-  <script type="application/x-javascript" src="chrome://bbsfox/content/bbsfoxPrefs.js"/>
   <script type="application/x-javascript" src="chrome://bbsfox/content/options.js"/>
 </dialog>

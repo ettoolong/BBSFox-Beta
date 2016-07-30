@@ -24,6 +24,7 @@ let soundService = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
 let bbsfoxAPI = require("./bbsfox-api.js");
 let bbsfoxAbout = require("./bbsfox-about.js");
 let bbsfoxBg = require("./bbsfox-bg.js");
+let bbsPrefs = require("./bbsfox-prefs.js");
 
 // preferences page - start
 sp.on("openPrefsTab", () => {
@@ -535,6 +536,8 @@ let bbstabs = {
       bbstabs.mouseLBtnDown = false;
     }
 
+    let tab = tabs.activeTab;
+    let xulTab = tabUtils.getTabForId(tab.id);
     let uri = tabUtils.getURI(xulTab);
     if(!this.urlCheck.test(uri))
       return;
@@ -1128,51 +1131,8 @@ cm.Item({
   data: "bbsfox_menu-removeFromBlacklist"
 });
 
-//
-function initDefaultPrefs () {
-  let bbsfoxPrefs = require("chrome://bbsfox/content/bbsfoxPrefs.js").bbsfoxPrefs;
-  //default site setting
-  let defaultPrefs = Cc["@mozilla.org/preferences-service;1"].
-                      getService(Ci.nsIPrefService).
-                      getDefaultBranch("extensions.bbsfox2.");
-  for(let i in bbsfoxPrefs.sitePrefs) {
-    let value = bbsfoxPrefs.sitePrefs[i];
-    if( typeof value === "boolean") {
-      defaultPrefs.setBoolPref("host_default." + i, value);
-    }
-    else if( typeof value === "number") {
-      defaultPrefs.setIntPref("host_default." + i, value);
-    }
-    else if( typeof value === "string"){
-      let nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-      nsIString.data = value;
-      defaultPrefs.setComplexValue("host_default." + i, Ci.nsISupportsString, nsIString);
-    }
-  }
-
-  //global setting
-  let globalPrefs = Cc["@mozilla.org/preferences-service;1"].
-               getService(Ci.nsIPrefService).
-               getDefaultBranch("extensions.");
-
-  for(let i in bbsfoxPrefs.globalPrefs) {
-    let value = bbsfoxPrefs.globalPrefs[i];
-    if( typeof value === "boolean") {
-      globalPrefs.setBoolPref(i, value);
-    }
-    else if( typeof value === "number") {
-      globalPrefs.setIntPref(i, value);
-    }
-    else if( typeof value === "string"){
-      let nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-      nsIString.data = value;
-      globalPrefs.setComplexValue(i, Ci.nsISupportsString, nsIString);
-    }
-  }
-}
-
 exports.main = function (options, callbacks) {
-  initDefaultPrefs();
+  bbsPrefs.initDefaultPrefs(data);
   bbstabs.init();
 
   // Init event listener - start

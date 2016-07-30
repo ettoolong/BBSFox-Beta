@@ -247,11 +247,29 @@ BBSFoxSiteSetting.prototype = {
 };
 
 function BBSFoxOptions() {
+  var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+  var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
+  var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
+  var sp = ssm.getSystemPrincipal();
+  var channel = ioService.newChannel2("chrome://bbsfox/content/prefs.json", //aSpec
+                           null, //aOriginCharset
+                           null, //aBaseURI
+                           null, //aLoadingNode
+                           sp, //aLoadingPrincipal
+                           null, //aTriggeringPrincipal
+                           Ci.nsILoadInfo.SEC_NORMAL, //aSecurityFlags
+                           Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+  var input = channel.open();
+  scriptableStream.init(input);
+  this.bbsfoxPrefs = JSON.parse( scriptableStream.read(input.available()) );
+  scriptableStream.close();
+  input.close();
+
   this.valueBool = [];
   this.valueInte = [];
   this.valueComp = [];
-  for(let i in bbsfoxPrefs.sitePrefs) {
-    let value = bbsfoxPrefs.sitePrefs[i];
+  for(let i in this.bbsfoxPrefs.sitePrefs) {
+    let value = this.bbsfoxPrefs.sitePrefs[i];
     if( typeof value === 'boolean') {
       this.valueBool.push(i);
     }
@@ -587,8 +605,8 @@ BBSFoxOptions.prototype = {
     //   if(item)
     //     item.value = bbsfoxPrefs[i];//item.getAttribute('bbsfoxDefaultValue');
     // }
-    for(let i in bbsfoxPrefs.sitePrefs) {
-      let value = bbsfoxPrefs.sitePrefs[i];
+    for(let i in options.bbsfoxPrefs.sitePrefs) {
+      let value = options.bbsfoxPrefs.sitePrefs[i];
       item = document.getElementById(i);
       if( typeof value === 'boolean') {
         item.checked = value;
