@@ -1,8 +1,6 @@
 // Javascript module for Unicode-at-on support
 // Reference: http://moztw.org/docs/big5/
 // http://moztw.org/docs/big5/table/uao250-u2b.txt
-const { classes: Cc, interfaces: Ci } = Components;
-var EXPORTED_SYMBOLS = ["uaoConv"];
 
 var uaoConv = {
     u2bTab: '',

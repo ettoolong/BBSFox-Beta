@@ -580,32 +580,36 @@ let bbstabs = {
       return;
     let browser = event.target.mCurrentBrowser;
 
-    // if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
-    //   switch(event.keyCode) {
-    //     case 33: //Page Up
-    //       event.stopPropagation();
-    //       event.preventDefault();
-    //       owner.setBBSCmd("doPageUp");
-    //       return;
-    //     case 34: //Page Down
-    //       event.stopPropagation();
-    //       event.preventDefault();
-    //       owner.setBBSCmd("doPageDown");
-    //       return;
-    //     case 38: //Arrow Up
-    //       event.stopPropagation();
-    //       event.preventDefault();
-    //       owner.setBBSCmd("doArrowUp");
-    //       return;
-    //     case 40: //Arrow Down
-    //       event.stopPropagation();
-    //       event.preventDefault();
-    //       owner.setBBSCmd("doArrowDown");
-    //       return;
-    //     default:
-    //       break;
-    //   }
-    // }
+    if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
+      switch(event.keyCode) {
+        case 33: //Page Up
+          event.stopPropagation();
+          event.preventDefault();
+          console.log('doPageUp');
+          this.setBBSCmd("doPageUp", browser);
+          return;
+        case 34: //Page Down
+          event.stopPropagation();
+          event.preventDefault();
+          console.log('doPageDown');
+          this.setBBSCmd("doPageDown", browser);
+          return;
+        case 38: //Arrow Up
+          event.stopPropagation();
+          event.preventDefault();
+          console.log('doArrowUp');
+          this.setBBSCmd("doArrowUp", browser);
+          return;
+        case 40: //Arrow Down
+          event.stopPropagation();
+          event.preventDefault();
+          console.log('doArrowDown');
+          this.setBBSCmd("doArrowDown", browser);
+          return;
+        default:
+          break;
+      }
+    }
     if(event.charCode){
       if(event.ctrlKey && !event.altKey && event.shiftKey && (event.charCode == 118 || event.charCode == 86) && eventPrefs.hokeyForPaste) { //Shift + ^V, do paste
         this.setBBSCmd("doPaste", browser);

@@ -3,8 +3,6 @@
 function BBSFox() {
     this.os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 
-    Cu.import("chrome://bbsfox/content/uao/uao.js");
-
     this.CmdHandler = document.getElementById('cmdHandler');
     this.CmdHandler.setAttribute('bbsfox', true);
     //this.CmdHandler.setAttribute('UpdateIcon', 'chrome://bbsfox/skin/logo/logo.png');

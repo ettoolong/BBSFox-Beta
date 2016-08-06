@@ -20,9 +20,9 @@ function unload() {
 
 function exec(msg) {
   switch(msg.data.name) {
-    case 'addonBaseUrl':
+    case "addonBaseUrl":
       return addonBaseUrl;
-    case 'unload':
+    case "unload":
       if(enable) {
         enable = false;
         return unload();
@@ -31,7 +31,7 @@ function exec(msg) {
   }
 }
 
-//ref: https://github.com/mozilla/pdf.js/blob/master/extensions/firefox/bootstrap.js
+//reference: https://github.com/mozilla/pdf.js/blob/master/extensions/firefox/bootstrap.js
 var addonBaseUrl = null;
 function startup(aData, aReason) {
   addonBaseUrl = aData.resourceURI.spec;

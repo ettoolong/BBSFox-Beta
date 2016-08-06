@@ -1,5 +1,4 @@
 //this javascript file ONLY for telnet.htm. Because we remove all inline javascript code from 'telnet.htm' and 'ssh.htm'.
-const { utils: Cu, classes: Cc, interfaces: Ci } = Components;
 var bbsfox;
 
 function startup() {

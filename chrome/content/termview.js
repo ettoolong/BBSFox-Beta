@@ -819,16 +819,16 @@ TermView.prototype={
             case 27: //ESC
                 conn.send('\x1b');
                 break;
-            case 33: //Page Up
-                conn.send('\x1b[5~');
-                e.preventDefault();
-                e.stopPropagation();
-                break;
-            case 34: //Page Down
-                conn.send('\x1b[6~');
-                e.preventDefault();
-                e.stopPropagation();
-                break;
+            // case 33: //Page Up
+            //     conn.send('\x1b[5~');
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     break;
+            // case 34: //Page Down
+            //     conn.send('\x1b[6~');
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     break;
             case 35: //End
                 conn.send('\x1b[4~');
                 break;
@@ -841,22 +841,22 @@ TermView.prototype={
                 else
                   conn.send('\x1b[D');
                 break;
-            case 38: //Arrow Up
-                conn.send('\x1b[A');
-                e.preventDefault();
-                e.stopPropagation();
-                break;
+            // case 38: //Arrow Up
+            //     conn.send('\x1b[A');
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     break;
             case 39: //Arrow Right
                 if(this.checkCurDB())
                   conn.send('\x1b[C\x1b[C');
                 else
                   conn.send('\x1b[C');
                 break;
-            case 40: //Arrow Down
-                conn.send('\x1b[B');
-                e.preventDefault();
-                e.stopPropagation();
-                break;
+            // case 40: //Arrow Down
+            //     conn.send('\x1b[B');
+            //     e.preventDefault();
+            //     e.stopPropagation();
+            //     break;
             case 45: //Insert
                 conn.send('\x1b[2~');
                 break;
