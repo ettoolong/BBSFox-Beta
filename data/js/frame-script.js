@@ -10,9 +10,7 @@ let regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
 let regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
              .isContractIDRegistered("@mozilla.org/network/protocol;1?name=ssh") ? false : true;
 
-let factorys = {};
-function setProtocol( enable ) {
-
+function regAll() {
   let createFactory = function () {
       // Register/unregister a constructor as a component.
       let Factory = {
@@ -30,7 +28,6 @@ function setProtocol( enable ) {
           let proto = targetConstructor.prototype;
           let registrar = Cm.QueryInterface(Ci.nsIComponentRegistrar);
           if(registrar.isContractIDRegistered(proto.contractID) ) {
-
           } else {
             registrar.registerFactory(proto.classID, proto.classDescription, proto.contractID, this);
           }
@@ -59,31 +56,49 @@ function setProtocol( enable ) {
       return Factory;
   };
 
-  if(enable) {
-    Cu.import("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
-    factorys.telnet = createFactory();
-    factorys.telnet.register(TelnetProtocol);
-
-    Cu.import("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
-    factorys.ssh = createFactory();
-    factorys.ssh.register(SshProtocol);
-  } else {
-    factorys.telnet.unregister();
-    delete factorys.telnet;
-    Cu.unload("chrome://bbsfox/content/protocols/install_telnet_protocol.js");
-
-    factorys.ssh.unregister();
-    delete factorys.ssh;
-    Cu.unload("chrome://bbsfox/content/protocols/install_ssh_protocol.js");
+  let addonBaseUrl = sendSyncMessage("bbsfox@ettoolong:bbsfox-globalCommand", {name:'addonBaseUrl'}).toString();
+  if(addonBaseUrl) {
+    Cu.import(addonBaseUrl + "chrome/content/protocols/install_telnet_protocol.js");
+    let factory = createFactory();
+    factory.register(TelnetProtocol);
+    let telnetSrv = Cc['@mozilla.org/network/protocol;1?name=telnet'].getService(Ci.nsIProtocolHandler).wrappedJSObject;
+    telnetSrv.setFactory(factory);
+  }
+  if(addonBaseUrl) {
+    Cu.import(addonBaseUrl + "chrome/content/protocols/install_ssh_protocol.js");
+    let factory = createFactory();
+    factory.register(SshProtocol);
+    let sshSrv = Cc['@mozilla.org/network/protocol;1?name=ssh'].getService(Ci.nsIProtocolHandler).wrappedJSObject;
+    sshSrv.setFactory(factory);
   }
 }
 
-if(regSsh || regTelnet) {
-  setProtocol(true);
+function unregAll() {
+  let telnetComponent = Cc['@mozilla.org/network/protocol;1?name=telnet'];
+  if(telnetComponent) {
+    let telnetSrv = telnetComponent.getService(Ci.nsIProtocolHandler).wrappedJSObject;
+    let telnetFactory = telnetSrv.getFactory();
+    if(telnetFactory) {
+      telnetSrv.setFactory(null);
+      telnetFactory.unregister();
+    }
+  }
+  let sshComponent = Cc['@mozilla.org/network/protocol;1?name=ssh'];
+  if(sshComponent) {
+    let sshSrv = sshComponent.getService(Ci.nsIProtocolHandler).wrappedJSObject;
+    let sshFactory = sshSrv.getFactory();
+    if(sshFactory) {
+      sshSrv.setFactory(null);
+      sshFactory.unregister();
+    }
+  }
 }
 
-// addMessageListener("bbsfox@ettoolong:bbsfox-globalCommand",
-//   function(message) {
-//     //TODO: unregister protocol
-//   }
-// );
+if(regTelnet || regSsh) {
+  regAll();
+}
+
+addMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", function(message) {
+  unregAll();
+  sendSyncMessage("bbsfox@ettoolong:bbsfox-globalCommand", {name:'unload'});
+});

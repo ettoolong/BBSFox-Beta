@@ -55,7 +55,10 @@ const nsIProtocolHandler = Ci.nsIProtocolHandler;
 const nsIURI             = Ci.nsIURI;
 const nsIStandardURL     = Ci.nsIStandardURL;
 
-function SshProtocol(){}
+function SshProtocol(){
+  this.regFactory = null;
+  this.wrappedJSObject = this;
+}
 
 SshProtocol.prototype =
 {
@@ -63,7 +66,7 @@ SshProtocol.prototype =
   classID: Cid("dbc42190-21eb-11e0-ac64-0800200c9a66"),
   contractID: "@mozilla.org/network/protocol;1?name="+ kSCHEME,
   QueryInterface: function QueryInterface(iid){
-    if (iid.equals(Ci.nsIProtocolHandler))
+    if (iid.equals(nsIProtocolHandler))
       return this;
     else
       throw Cr.NS_ERROR_NO_INTERFACE;
@@ -76,6 +79,14 @@ SshProtocol.prototype =
 
   allowPort: function(port, scheme) {
     return false;
+  },
+
+  setFactory: function(factory) {
+    this.regFactory = factory;
+  },
+
+  getFactory: function(factory) {
+    return this.regFactory;
   },
 
   newURI: function(spec, charset, baseURI) {

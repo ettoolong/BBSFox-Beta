@@ -55,14 +55,17 @@ const nsIProtocolHandler = Ci.nsIProtocolHandler;
 const nsIStandardURL     = Ci.nsIStandardURL;
 const nsIURI             = Ci.nsIURI;
 
-function TelnetProtocol() {}
+function TelnetProtocol() {
+  this.regFactory = null;
+  this.wrappedJSObject = this;
+}
 
 TelnetProtocol.prototype = {
   classDescription: kPROTOCOL_NAME,
   classID:          kPROTOCOL_CID,
   contractID:       kPROTOCOL_CONTRACTID,
   QueryInterface: function QueryInterface(iid){
-    if (iid.equals(Ci.nsIProtocolHandler))
+    if (iid.equals(nsIProtocolHandler))
       return this;
     else
       throw Cr.NS_ERROR_NO_INTERFACE;
@@ -74,6 +77,14 @@ TelnetProtocol.prototype = {
 
   allowPort: function(port, scheme) {
     return false
+  },
+
+  setFactory: function(factory) {
+    this.regFactory = factory;
+  },
+
+  getFactory: function(factory) {
+    return this.regFactory;
   },
 
   newURI: function(spec, charset, baseURI) {
