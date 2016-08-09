@@ -449,9 +449,9 @@ bbsfoxPrefHandler.prototype={
           break;
         case "ask":
           if(branch.getBoolPref(name))
-            bbsCore.RegExitAlert();
+            bbsCore.regExitAlert();
           else
-            bbsCore.UnregExitAlert();
+            bbsCore.unregExitAlert();
           break;
         case "DetectLink":
           _this.useHyperLink=branch.getBoolPref(name);

@@ -55,12 +55,6 @@ const nsIProtocolHandler = Ci.nsIProtocolHandler;
 const nsIStandardURL     = Ci.nsIStandardURL;
 const nsIURI             = Ci.nsIURI;
 
-let regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
-             .isContractIDRegistered(kTELNET_CONTRACTID) ? false : true;
-
-let regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
-             .isContractIDRegistered(kSSH_CONTRACTID) ? false : true;
-
 function regAll() {
   function TelnetProtocol() {
     this.regFactory = null;
@@ -227,12 +221,14 @@ function regAll() {
 }
 
 function unregAll() {
-  let telnetComponent = Cc[kTELNET_CONTRACTID];
-  if(telnetComponent) {
-    let service;
-    try {
-      service = telnetComponent.getService(Ci.nsIProtocolHandler).wrappedJSObject;
-    } catch(e) {}
+  let unregTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+                  .isContractIDRegistered(kTELNET_CONTRACTID) ? true : false;
+
+  let unregSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+               .isContractIDRegistered(kSSH_CONTRACTID) ? true : false;
+
+  if(unregTelnet) {
+    let service = Cc[kTELNET_CONTRACTID].getService(Ci.nsIProtocolHandler).wrappedJSObject;
     if(service) {
       let factory = service.getFactory();
       if(factory) {
@@ -241,12 +237,9 @@ function unregAll() {
       }
     }
   }
-  let sshComponent = Cc[kSSH_CONTRACTID];
-  if(sshComponent) {
-    let service;
-    try {
-      service = sshComponent.getService(Ci.nsIProtocolHandler).wrappedJSObject;
-    } catch(e) {}
+
+  if(unregSsh) {
+    let service = Cc[kSSH_CONTRACTID].getService(Ci.nsIProtocolHandler).wrappedJSObject;
     if(service) {
       let factory = service.getFactory();
       if(factory) {
@@ -257,11 +250,21 @@ function unregAll() {
   }
 }
 
-if(regTelnet || regSsh) {
-  regAll();
+function run() {
+  let regTelnet = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+                  .isContractIDRegistered(kTELNET_CONTRACTID) ? false : true;
+
+  let regSsh = Cm.QueryInterface(Ci.nsIComponentRegistrar)
+               .isContractIDRegistered(kSSH_CONTRACTID) ? false : true;
+
+  if(regTelnet || regSsh) {
+    regAll();
+  }
 }
 
 addMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", function(message) {
   unregAll();
   sendSyncMessage("bbsfox@ettoolong:bbsfox-globalCommand", {name:"unload"});
 });
+
+run();

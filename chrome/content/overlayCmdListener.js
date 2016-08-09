@@ -228,6 +228,10 @@ BBSOverlayCmdListener.prototype={
           case "skipMouseClick":
             bbscore.CmdHandler.setAttribute('SkipMouseClick','1');
             break;
+          case "unload":
+            bbscore.unregExitAlert();
+            window.close();
+            break;
           case "setAlert":
             //bbscore.view.showAlertMessageEx(false, true, false, data.alertMessage);
             //alert(param);

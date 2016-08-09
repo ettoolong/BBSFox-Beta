@@ -372,7 +372,7 @@ let bbstabs = {
   setBBSCmd: function(command, target) {
     if(!target) {
       let tab = tabs.activeTab;
-      if(this.urlCheck.test(tab.url)) { // telnet:// or ssh://
+      if(tab && this.urlCheck.test(tab.url)) { // telnet:// or ssh://
         let xulTab = tabUtils.getTabForId(tab.id);
         target = tabUtils.getBrowserForTab(xulTab);
       }
@@ -1173,11 +1173,20 @@ exports.main = function (options, callbacks) {
 
 exports.onUnload = function (reason) {
   if (reason !== "shutdown"){
-
     // remove all event listener - start
     let allWindows = winUtils.windows(null, {includePrivate:true});
     for (let chromeWindow of allWindows) {
       if(winUtils.isBrowser(chromeWindow)) {
+        if (reason === "disable" || reason === "uninstall") {
+          let openedTabs = tabUtils.getTabs( chromeWindow );
+          for(let openedTab of openedTabs) {
+            let url = modelFor(openedTab).url;
+            if(bbstabs.urlCheck.test(url)) {
+              let target = tabUtils.getBrowserForTab(openedTab);
+              bbstabs.setBBSCmd("unload", target);
+            }
+          }
+        }
         bbstabs.onWinClose( chromeWindow );
       }
     }

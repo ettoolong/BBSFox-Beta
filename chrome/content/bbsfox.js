@@ -232,7 +232,7 @@ BBSFox.prototype={
     },
 
     onClose: function(conn) {
-        this.UnregExitAlert();
+        this.unregExitAlert();
 
         this.connectState = 2;
         this.unusedTime = 0;
@@ -1785,13 +1785,13 @@ BBSFox.prototype={
       return document.title;
     },
 
-    RegExitAlert: function(){
-      this.UnregExitAlert();
+    regExitAlert: function(){
+      this.unregExitAlert();
       this.alertBeforeUnload = true;
       window.addEventListener('beforeunload', this.window_beforeunload, false);
     },
 
-    UnregExitAlert: function(){
+    unregExitAlert: function(){
       // clear alert for closing tab
       if(this.alertBeforeUnload) {
         this.alertBeforeUnload = false;
