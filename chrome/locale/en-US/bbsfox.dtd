@@ -224,7 +224,6 @@
 <!ENTITY options_hotkeydowntext.label "Text">
 <!ENTITY options_hotkeydownansi.label "AnsiCopy">
 <!ENTITY options_hotkeydownhtml.label "HTML">
-<!ENTITY options_usehttpcontextmenu.label "Use web page context menu">
 <!ENTITY options_bbsfoxcontextmenu.label "BBSFox context menu">
 <!ENTITY options_ansicopymenu.label "Enable item [Copy with ANSI Color]">
 <!ENTITY options_embeddedplayermenu.label "Enable item [Enable Embedded Player](only support Youtube/USTREAM)">
@@ -245,7 +244,6 @@
 <!ENTITY options_blacklistemenu.label "Enable item [Blacklist]">
 <!ENTITY options_onlyforpttsite.label "(only for ptt.cc site)">
 <!ENTITY options_changecolortablemenu.label "Enable item [Switch Normal/Highlight Display]">
-<!ENTITY options_usesubmenuforsearchengine.label "Use sub-menu for search engine.">
 <!ENTITY options_submenuforsearchenginenote.label "This item only for BBS context menu.For web context you can install add-on [Context Search]">
 <!ENTITY options_firefoxcontextmenu.label "Firefox context menu">
 <!ENTITY options_optionnote0.label "The following context menu items are working properly for pcmanfx,">

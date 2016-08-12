@@ -1,5 +1,4 @@
 //fire event from bbsfox overlay
-//console.log('load bbsfox_frame_script');
 
 const { utils: Cu, classes: Cc, interfaces: Ci, manager: Cm, results: Cr } = Components;
 addMessageListener("bbsfox@ettoolong:bbsfox-overlayCommand",
@@ -49,7 +48,7 @@ let init = function() {
   if(content) {
     let bbscore = content.bbsfox;
     if(bbscore) {
-      //console.log('bbsfox_frame_script: sendSyncMessage frameScriptReady');
+      //console.log("bbsfox_frame_script: sendSyncMessage frameScriptReady");
       sendSyncMessage("bbsfox@ettoolong:bbsfox-coreCommand", {command: "frameScriptReady"});
       bbscore.setFrameScript( function(command, async){
         if(!async)
@@ -85,7 +84,7 @@ addMessageListener("bbsfox@ettoolong:bbsfox-overlayEvent", function(message) {
 });
 
 addEventListener("DOMContentLoaded", function(event) {
-  //console.log('DOMContentLoaded: ' + content.document.location.protocol);
+  //console.log("DOMContentLoaded: " + content.document.location.protocol);
   let doc = event.originalTarget;
   if(event.originalTarget.nodeName == "#document"){
     let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);

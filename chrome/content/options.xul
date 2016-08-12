@@ -678,8 +678,6 @@
 
                   <tabpanel>
                     <vbox>
-                      <checkbox id="UseHttpContextMenu" label="&options_usehttpcontextmenu.label;" hidden="true" bbsfoxDefaultValue="true"/>
-                      <checkbox id="UseSubMenuForSearchEngine" label="&options_usesubmenuforsearchengine.label;" hidden="true" bbsfoxDefaultValue="false"/>
                       <tabbox>
                         <tabs>
                           <tab label="&options_bbsfoxcontextmenu.label;"/>

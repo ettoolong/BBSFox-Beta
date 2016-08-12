@@ -224,7 +224,6 @@
 <!ENTITY options_hotkeydowntext.label "文字">
 <!ENTITY options_hotkeydownansi.label "ANSI彩色">
 <!ENTITY options_hotkeydownhtml.label "HTML">
-<!ENTITY options_usehttpcontextmenu.label "使用網頁的快顯功能表">
 <!ENTITY options_bbsfoxcontextmenu.label "BBSFox快顯功能表">
 <!ENTITY options_ansicopymenu.label "啟用 [複製(包含ANSI色碼)] 項目">
 <!ENTITY options_embeddedplayermenu.label "啟用 [在浮動視窗中顯示影片] 項目(此功能目前僅支援Youtube/USTREAM)">
@@ -245,7 +244,6 @@
 <!ENTITY options_blacklistemenu.label "啟用 [黑名單] 相關項目">
 <!ENTITY options_onlyforpttsite.label "(只支援PTT)">
 <!ENTITY options_changecolortablemenu.label "啟用 [切換高亮度顯示] 項目">
-<!ENTITY options_usesubmenuforsearchengine.label "使用搜尋引擎子選單">
 <!ENTITY options_submenuforsearchenginenote.label "此項目只適用BBS快顯功能表，通用網頁的快顯功能表請安裝Context Search套件">
 <!ENTITY options_firefoxcontextmenu.label "Firefox快顯功能表">
 <!ENTITY options_optionnote0.label "以下快顯功能表項目在此套件下均可正常使用，">

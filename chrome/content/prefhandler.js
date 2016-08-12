@@ -94,20 +94,19 @@ function bbsfoxPrefHandler(listener) {
     this.keepFontAspectRatio=false;
     this.hokeyChangeColorTable=false;
     this.fixUnicodeDisplay=false;
-    //this.mouseWheelFunc1=0;
-    //this.mouseWheelFunc2=0;
-    //this.mouseWheelFunc3=0;
-    this.hokeyForMouseBrowsing=false;
     this.bbsColor=['#000000','#800000','#008000','#808000',
                    '#000080','#800080','#008080','#c0c0c0',
                    '#808080','#ff0000','#00ff00','#ffff00',
                    '#0000ff','#ff00ff','#00ffff','#ffffff'];
+
     //overlay pref
     this.previewPictureMenu = false;
     //this.savePageMenu = false;
     //
     this.status = {
       mouseOnPicWindow: false,
+      ansiColorToolOpened: false,
+      screenKeyboardOpened: false
     };
 
     this.eventPrefs = {
@@ -116,11 +115,17 @@ function bbsfoxPrefHandler(listener) {
       mouseWheelFunc3 : 0,
       hokeyForPaste : false,
       hokeyForMouseBrowsing: false,
-      hotkeyCtrlW: false,
-      hotkeyCtrlT: false,
-      useHttpContextMenu: true,
+      hotkeyCtrlW: 1,
+      hotkeyCtrlB: 1,
+      hotkeyCtrlL: 1,
+      hotkeyCtrlT: 1,
       useMouseBrowsing: true,
-      keyEventStatus: true,
+      keyEventStatus: true, //TODO: prevent key event from addon-script
+      hideBookMarkLink: true,
+      hideSendLink: true,
+      hideSendPage: true,
+      hideViewInfo: true,
+      hideInspect: true,
       result: true
     };
 }
@@ -478,9 +483,11 @@ bbsfoxPrefHandler.prototype={
           break;
         case "HotkeyCtrlB":
           _this.hotkeyCtrlB = branch.getIntPref(name);
+          _this.updateEventPrefs([{key:'hotkeyCtrlB', value:_this.hotkeyCtrlB}]);
           break;
         case "HotkeyCtrlL":
           _this.hotkeyCtrlL = branch.getIntPref(name);
+          _this.updateEventPrefs([{key:'hotkeyCtrlL', value:_this.hotkeyCtrlL}]);
           break;
         case "HotkeyCtrlT":
           _this.hotkeyCtrlT = branch.getIntPref(name);
@@ -503,8 +510,7 @@ bbsfoxPrefHandler.prototype={
           _this.hokeyForSelectAll = branch.getBoolPref(name);
           break;
         case "HokeyForMouseBrowsing":
-          _this.hokeyForMouseBrowsing = branch.getBoolPref(name);
-          _this.updateEventPrefs([{key:'hokeyForMouseBrowsing', value:_this.hokeyForMouseBrowsing}]);
+          _this.updateEventPrefs([{key:'hokeyForMouseBrowsing', value:branch.getBoolPref(name)}]);
           break;
         case "HokeyForEasyReading":
           _this.hokeyForEasyReading = branch.getBoolPref(name);
@@ -574,14 +580,6 @@ bbsfoxPrefHandler.prototype={
         case "BlacklistMenu":
           _this.blacklistMenu = branch.getBoolPref(name);
           break;
-        /* TODO: remove this feature
-        case "UseSubMenuForSearchEngine":
-          if(branch.getBoolPref(name))
-            bbsCore.CmdHandler.setAttribute('UseSubMenuForSearchEngine', '1');
-          else
-            bbsCore.CmdHandler.setAttribute('UseSubMenuForSearchEngine', '0');
-          break;
-        */
         case "FileIoMenu":
           _this.fileIoMenu = branch.getBoolPref(name);
           break;
@@ -630,12 +628,6 @@ bbsfoxPrefHandler.prototype={
           break;
         case "EPWhenDropLink":
           _this.epWhenDropLink = branch.getBoolPref(name);
-          break;
-        case "UseHttpContextMenu":
-          /*
-          // ignor this option.
-          _this.updateEventPrefs([{key:'useHttpContextMenu', value:branch.getBoolPref(name)}]);
-          */
           break;
         case "EnableNotification":
           _this.enableNotification=branch.getBoolPref(name);
@@ -716,9 +708,6 @@ bbsfoxPrefHandler.prototype={
         case "HideSendLinkMenu":
           _this.updateEventPrefs([{key:'hideSendLink', value:branch.getBoolPref(name)}]);
           break;
-        // case "HideBookMarkPageMenu": //TODO: rremove this feature
-        //   _this.updateEventPrefs([{key:'hideBookMarkPage', value:branch.getBoolPref(name)}]);
-        //   break;
         case "HideSendPageMenu":
           _this.updateEventPrefs([{key:'hideSendPage', value:branch.getBoolPref(name)}]);
           break;

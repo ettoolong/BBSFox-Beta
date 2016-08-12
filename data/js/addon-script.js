@@ -124,11 +124,7 @@ let bbstabs = {
         let xulTab = tabUtils.getTabForBrowser(message.target);
         if(xulTab.selected)
           bbstabs.setBBSCmd("setTabSelect", message.target );
-
         //console.log("handleCoreCommand: frameScriptReady");
-        // //sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayEvent", {});
-        // let id = tabUtils.getTabId(tabUtils.getTabForBrowser( message.target ));
-        // message.target.messageManager.sendAsyncMessage("bbsfox@ettoolong:bbsfox-overlayEvent", {command:'updateId', id: id});
         break;
       }
       case "loadAutoLoginInfo":
@@ -568,16 +564,16 @@ let bbstabs = {
 
   key_press: function (event) {
 
-    let tab = event.target.mCurrentTab;
-    if(!tab) //why tab undefined
-      return;
-    let eventPrefs = tab.eventPrefs;
-    if(!eventPrefs)
+    let tab = tabs.activeTab;
+    let xulTab = tabUtils.getTabForId(tab.id);
+    let eventPrefs = xulTab.eventPrefs;
+    if(!eventPrefs || !eventPrefs.keyEventStatus)
       return;
 
-    let uri = tabUtils.getURI(tab);
+    let uri = tabUtils.getURI(xulTab);
     if(!this.urlCheck.test(uri))
       return;
+
     let browser = event.target.mCurrentBrowser;
 
     if (!event.ctrlKey && !event.altKey && !event.shiftKey) {
@@ -585,25 +581,21 @@ let bbstabs = {
         case 33: //Page Up
           event.stopPropagation();
           event.preventDefault();
-          console.log('doPageUp');
           this.setBBSCmd("doPageUp", browser);
           return;
         case 34: //Page Down
           event.stopPropagation();
           event.preventDefault();
-          console.log('doPageDown');
           this.setBBSCmd("doPageDown", browser);
           return;
         case 38: //Arrow Up
           event.stopPropagation();
           event.preventDefault();
-          console.log('doArrowUp');
           this.setBBSCmd("doArrowUp", browser);
           return;
         case 40: //Arrow Down
           event.stopPropagation();
           event.preventDefault();
-          console.log('doArrowDown');
           this.setBBSCmd("doArrowDown", browser);
           return;
         default:
@@ -650,7 +642,7 @@ let bbstabs = {
   bbsfoxContextMenuShowing: function(event) {
     let sortItem = event.target.getAttribute("sortItem");
     if(!sortItem) {
-      //console.log('sort context menu items');
+      //console.log("sort context menu items");
       let menuItems = event.target.childNodes;
       // sort items - start
       // only need do this once.
@@ -702,7 +694,7 @@ let bbstabs = {
         //console.log(event.target);
         let doc = event.target.ownerDocument;
         if(!this.contextLink)
-          this.setItemVisible(doc, "context-paste", true); //TODO: don't display, if click on link
+          this.setItemVisible(doc, "context-paste", true);
 
         // this.setItemVisible(doc, "context-back", false);
         // this.setItemVisible(doc, "context-forward", false);
@@ -813,7 +805,7 @@ let bbstabs = {
   onWinOpen: function(chromeWindow) {
     let useRemoteTabs = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor)
      .getInterface(Ci.nsIWebNavigation).QueryInterface(Ci.nsILoadContext).useRemoteTabs;
-    //console.log('useRemoteTabs = ' + useRemoteTabs);
+    //console.log("useRemoteTabs = " + useRemoteTabs);
 
     let chromeBrowser = chromeWindow.gBrowser; //chromeBrowser undefined????
     if(chromeBrowser) {
@@ -884,31 +876,7 @@ let bbstabs = {
       let tabBrowser = tabUtils.getBrowserForTab(xulTab);
       bbstabs.setBBSCmd("setTabSelect", tabBrowser );
     });
-  },
-
-  /*
-  getContentScript: function(prefName, command) {
-    let action = "";
-    if(!command) {
-      action = "  self.postMessage(data);";
-    }
-    else {
-      action = "  unsafeWindow.bbsfox.overlaycmd.exec({command:'" + command +"'});";
-    }
-    let cs = [
-      "self.on('context', function (node) {",
-      "  if(!unsafeWindow.bbsfox) {",
-      "    return false;",
-      "  }",
-      "  return unsafeWindow.bbsfox.prefs." + prefName + ";",
-      "});",
-      "self.on('click', function(node, data) {",
-      action,
-      "});"
-    ];
-    return cs.join("");
-  }*/
-
+  }
 };
 
 windows.on("open" ,  win => {
@@ -955,7 +923,7 @@ cm.Item({
     bbstabs.selectionText = context.selectionText;
     bbstabs.imageSrc = context.srcURL;
     //console.log(cmItemPreviewPicture);
-    //let cmitems = winUtils.getMostRecentBrowserWindow().document.querySelectorAll(".addon-context-menu-item[value='bbsfox_menu-previewPicture']");
+    //let cmitems = winUtils.getMostRecentBrowserWindow().document.querySelectorAll(".addon-context-menu-item[value="bbsfox_menu-previewPicture"]");
     return (context.linkURL && !(context.linkURL.search(/\.(bmp|gif|jpe?g|png)$/i) === -1));
   }),
   contentScriptFile: data.url("js/context-menu/previewPicture.js"),

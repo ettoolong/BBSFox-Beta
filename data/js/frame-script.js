@@ -41,7 +41,6 @@
 // reference: Working with multiprocess Firefox
 // https://developer.mozilla.org/en-US/Add-ons/Working_with_multiprocess_Firefox
 
-//console.log("global frame-script.js");
 const { classes: Cc, interfaces: Ci, manager: Cm, results: Cr, ID: Cid } = Components;
 
 const kTELNET_CONTRACTID = "@mozilla.org/network/protocol;1?name=telnet";

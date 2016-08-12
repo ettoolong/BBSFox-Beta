@@ -13,6 +13,7 @@ var enable = false;
 var addonBaseUrl = null;
 
 function unload() {
+  //unload frame-script, unregister telnet protocol handler
   let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster);
   globalMM.removeMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", exec);
   globalMM.removeDelayedFrameScript(addonBaseUrl + "data/js/frame-script.js");
@@ -32,12 +33,11 @@ function exec(msg) {
 }
 
 //reference: https://github.com/mozilla/pdf.js/blob/master/extensions/firefox/bootstrap.js
-var addonBaseUrl = null;
 function startup(aData, aReason) {
   addonBaseUrl = aData.resourceURI.spec;
   enable = true;
   startupBS(aData, aReason);
-  addonBaseUrl = aData.resourceURI.spec;
+  //load frame-script, register telnet protocol handler
   let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIFrameScriptLoader);
   globalMM.addMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", exec);
   globalMM.loadFrameScript(addonBaseUrl + "data/js/frame-script.js", true);
@@ -48,7 +48,6 @@ function shutdown(aData, aReason) {
   if (aReason == APP_SHUTDOWN)
     return;
   let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster);
+  // send message. it's time to unload frame-script.
   globalMM.broadcastAsyncMessage("bbsfox@ettoolong:bbsfox-globalCommand");
-  //globalMM.removeMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", exec);
-  //globalMM.removeDelayedFrameScript(addonBaseUrl + "data/js/frame-script.js");
 }
