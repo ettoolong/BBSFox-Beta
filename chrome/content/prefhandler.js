@@ -7,7 +7,6 @@ function bbsfoxPrefHandler(listener) {
     this.highlightWords_local=[];
     this.enableHighlightWords=false;
     this.keyWordTrackCaseSensitive=true;
-    this.keyWordTrackMenu=false;
     this.useMouseBrowsing = false;
     this.useMouseBrowsingEx = false;
     this.highlightCursor = false;
@@ -100,7 +99,23 @@ function bbsfoxPrefHandler(listener) {
                    '#0000ff','#ff00ff','#00ffff','#ffffff'];
 
     //overlay pref
+    this.ansiCopyMenu = true;
+    this.embeddedPlayerMenu = true;
     this.previewPictureMenu = false;
+    this.mouseBrowseMenu = false;
+    this.switchBgDisplayMenu = false;
+    this.openAllLinkMenu = false;
+    this.copyHtmlMenu = false;
+    this.screenKeyboardMenu = true;
+    this.ansiColorToolMenu = true;
+    this.keyWordTrackMenu = false;
+    this.easyReadingMenu = false;
+    this.downloadPostMenu = false;
+    this.fileIoMenu = false;
+    this.changeColorTableMenu = false;
+    this.blacklistMenu = false;
+    this.pushThreadMenu = false;
+    this.openThreadUrlMenu = false;
     //this.savePageMenu = false;
     //
     this.status = {
@@ -124,6 +139,7 @@ function bbsfoxPrefHandler(listener) {
       hideBookMarkLink: true,
       hideSendLink: true,
       hideSendPage: true,
+      hideViewSource: true,
       hideViewInfo: true,
       hideInspect: true,
       result: true
@@ -710,6 +726,9 @@ bbsfoxPrefHandler.prototype={
           break;
         case "HideSendPageMenu":
           _this.updateEventPrefs([{key:'hideSendPage', value:branch.getBoolPref(name)}]);
+          break;
+        case "HideViewSourceMenu":
+          _this.updateEventPrefs([{key:'hideViewSource', value:branch.getBoolPref(name)}]);
           break;
         case "HideViewInfoMenu":
           _this.updateEventPrefs([{key:'hideViewInfo', value:branch.getBoolPref(name)}]);

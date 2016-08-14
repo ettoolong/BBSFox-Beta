@@ -255,12 +255,11 @@ BBSFox.prototype={
         //issue: if (!this.reconnectDelay) && (this.reconnectCount==0), will try reconnect VERY quickly. when your network is not ready, that will make some problem!
         if(this.prefs.reconnectCount == 0) //always reconnect
         {
-          var _this = this;
-          this.reconnectTimer = setTimer(false, function() {
-            _this.buf.clear(2);
-            _this.buf.attr.resetAttr();
-            _this.reconnectTimer = null;
-            _this.conn.connect();
+          this.reconnectTimer = setTimer(false, () => {
+            this.buf.clear(2);
+            this.buf.attr.resetAttr();
+            this.reconnectTimer = null;
+            this.conn.connect();
           }, 500);
         }
         else
@@ -270,12 +269,11 @@ BBSFox.prototype={
           this.conn.connect();
         }
       } else {
-        var _this = this;
-        this.reconnectTimer = setTimer(false, function() {
-          _this.buf.clear(2);
-          _this.buf.attr.resetAttr();
-          _this.reconnectTimer = null;
-          _this.conn.connect();
+        this.reconnectTimer = setTimer(false, () => {
+          this.buf.clear(2);
+          this.buf.attr.resetAttr();
+          this.reconnectTimer = null;
+          this.conn.connect();
         }, this.prefs.reconnectDelay * 1000);
       }
     },
@@ -316,12 +314,10 @@ BBSFox.prototype={
 
     setMbTimer: function() {
       this.cancelMbTimer();
-      var _this=this;
-      var func=function() {
-        _this.mbTimer=null;
-        _this.CmdHandler.setAttribute('SkipMouseClick','0');
-      };
-      this.mbTimer = setTimer(false, func, 100);
+      this.mbTimer = setTimer(false, () => {
+        this.mbTimer = null;
+        this.CmdHandler.setAttribute('SkipMouseClick','0');
+      }, 100);
     },
 
     cancelDblclickTimer: function(enableEvent) {
@@ -338,12 +334,10 @@ BBSFox.prototype={
     setDblclickTimer: function() {
       this.cancelDblclickTimer();
       this.view.BBSWin.style.MozUserSelect = 'none';
-      var _this=this;
-      var func=function() {
-        _this.dblclickTimer=null;
-        _this.view.BBSWin.style.MozUserSelect = 'text';
-      };
-      this.dblclickTimer = setTimer(false, func, 400);
+      this.dblclickTimer = setTimer(false, () => {
+        this.dblclickTimer = null;
+        this.view.BBSWin.style.MozUserSelect = 'text';
+      }, 400);
     },
 
     cancelMouseDownTimer: function() {
@@ -369,13 +363,11 @@ BBSFox.prototype={
         this.dblclickTimer.cancel();
         this.dblclickTimer=null;
       }
-      var _this=this;
-      var func=function() {
-        _this.inputAreaFocusTimer.cancel();
-        _this.inputAreaFocusTimer=null;
-        _this.setInputAreaFocus();
-      };
-      this.inputAreaFocusTimer = setTimer(false, func, 1);
+      this.inputAreaFocusTimer = setTimer(false, () => {
+        this.inputAreaFocusTimer.cancel();
+        this.inputAreaFocusTimer = null;
+        this.setInputAreaFocus();
+      }, 1);
     },
 
     redraw: function() {
@@ -578,7 +570,7 @@ BBSFox.prototype={
                                           Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
 
       var ins = channel.open();
-      var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
+      var scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
       scriptableStream.init(ins);
       var str=scriptableStream.read(ins.available());
       scriptableStream.close();
@@ -1050,23 +1042,21 @@ BBSFox.prototype={
       if(bbsfox.isDefaultPref != browserutils.isDefaultPref)
       {
         bbsfox.prefListener.unregister();
+        bbsfox.isDefaultPref = browserutils.isDefaultPref;
+        bbsfox.siteAuthInfo = browserutils.siteAuthInfo;
         bbsfox.prefListener = browserutils.prefListener(function(branch, name) {
           bbsfox.prefs.onPrefChange(bbsfox, branch, name);
         }, bbsfox.prefs);
-        bbsfox.isDefaultPref = browserutils.isDefaultPref;
-        bbsfox.siteAuthInfo = browserutils.siteAuthInfo;
       }
     },
 
     doSiteSettingCheck: function(t) {
-        if(this.settingCheckTimer)
-          this.settingCheckTimer.cancel();
-        var _this=this;
-        var func=function() {
-                _this.settingCheckTimer = null;
-                _this.siteSettingCheck();
-        };
-        this.settingCheckTimer = setTimer(false, func, t);
+      if(this.settingCheckTimer)
+        this.settingCheckTimer.cancel();
+      this.settingCheckTimer = setTimer(false, () => {
+        this.settingCheckTimer = null;
+        this.siteSettingCheck();
+      }, t);
     },
 
     cancelDownloadAndPaste: function() {
@@ -1141,7 +1131,7 @@ BBSFox.prototype={
         if(this.prefs.useMouseBrowsing) {
           this.setDblclickTimer();
         }
-        if(event.target && event.target.getAttribute("link")=='true')
+        if(event.target && event.target.getAttribute("link")=='true') //TODO: check target type.
         {
           //try to find out ancher node and get boardName.
           //if boardName == current boardname, jump to other board
@@ -1249,14 +1239,12 @@ BBSFox.prototype={
         this.cancelMouseDownTimer();
         //this.mouseDownTimeout = false;
         if(window.getSelection().isCollapsed && this.prefs.useMouseBrowsing && this.prefs.useMouseBrowseSendEnter && onbbsarea) {
-          var _this = this;
-          var func = function() {
-            if(_this.mouseLeftButtonDown && window.getSelection().isCollapsed)
-              _this.conn.send(_this.prefs.EnterChar);
-            _this.mouseDownTimer = null;
-            _this.CmdHandler.setAttribute('SkipMouseClick','1');
-          };
-          this.mouseDownTimer = setTimer(false, func, 1000);
+          this.mouseDownTimer = setTimer(false, () => {
+            if(this.mouseLeftButtonDown && window.getSelection().isCollapsed)
+              this.conn.send(this.prefs.EnterChar);
+            this.mouseDownTimer = null;
+            this.CmdHandler.setAttribute('SkipMouseClick','1');
+          }, 1000);
         }
       }
       else if(event.button==2)

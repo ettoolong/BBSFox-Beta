@@ -251,6 +251,7 @@
 <!ENTITY options_hidebookmarklinkmenu.label "Hide item [Add link to bookmark] in context menu when at BBS page">
 <!ENTITY options_hidesendlinkmenu.label "Hide item [Send link] in context menu when at BBS page">
 <!ENTITY options_hidesendpagemenu.label "Hide item [Send page] in context menu when at BBS page">
+<!ENTITY options_hideviewsourcemenu.label "Hide item [View source] in context menu when at BBS page">
 <!ENTITY options_hideviewinfomenu.label "Hide item [View info] in context menu when at BBS page">
 <!ENTITY options_hideinspectmenu.label "Hide item [Inspect Element] in context menu when at BBS page">
 <!ENTITY options_downloadlinedelay.label "Line delay in download post">

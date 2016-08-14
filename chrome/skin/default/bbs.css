@@ -275,7 +275,7 @@ span{margin: 0px;}
 .picturePreview {background:white; color:black; padding:0px;margin: 0px;}
 
 .sBtn{
-  font-family: MingLiu, monospace;
+  font-family: "MingLiU, Osaka-Mono, monospace";
   font-size: 12px;
   cursor: default;
   min-width: 26px;
@@ -283,4 +283,22 @@ span{margin: 0px;}
   margin-left:2px;
   margin-right:2px;
   margin-bottom:2px;
+}
+
+.colorBtn{
+  border-radius: 0px;
+  border-color: #FFF;
+  border-width: 2px;
+  border-style: solid;
+  width: 26px;
+  height: 22px;
+}
+
+.colorPreview{
+  width: 30px;
+  height: 30px;
+  color: #FFF;
+  background: #000;
+  margin: 2px 5px;
+  padding: 5px;
 }

@@ -248,7 +248,7 @@ BBSFoxSiteSetting.prototype = {
 
 function BBSFoxOptions() {
   var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-  var scriptableStream=Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
+  var scriptableStream = Cc["@mozilla.org/scriptableinputstream;1"].getService(Ci.nsIScriptableInputStream);
   var ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
   var sp = ssm.getSystemPrincipal();
   var channel = ioService.newChannel2("chrome://bbsfox/content/prefs.json", //aSpec
@@ -628,7 +628,7 @@ BBSFoxOptions.prototype = {
     fp.appendFilter("SQLite", "*.sqlite");
     fp.defaultString = "BBSFox_Backup.sqlite";
     //if (fp.show() == fp.returnCancel || !fp.file) return;
-    fp.open(function(result) {
+    fp.open( result => {
       if(result != fp.returnCancel && fp.file) {
 
         var file = fp.file.QueryInterface(Ci.nsIFile);
@@ -736,8 +736,7 @@ BBSFoxOptions.prototype = {
           dbConn.asyncClose();
         }
       }
-    }.bind(this));
-
+    });
   },
 
   backupbgfile: function(branch, dbConn, params, site) {
@@ -780,13 +779,43 @@ BBSFoxOptions.prototype = {
   recover: function() {
     //  For reviewer:
     //  recover function - load all bbsfox preferences from sqlite file
-    var nsIFilePicker = Ci.nsIFilePicker;
-    var fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+    let branch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox2.");
+    let jobCount = 0;
+    let dbConn = null;
+    let newlist = [];
+
+    let handleCompletion = () => {
+      jobCount++;
+      if(jobCount === 3) {
+        //try to recover background picture - start
+        let allAddrList = this.browserutils.getSiteAddrList();
+        for(let addr of allAddrList)
+          this.recoverbgfile(branch, dbConn, addr);
+        this.recoverbgfile(branch, dbConn, "default");
+        //try to recover background picture - end
+        if(dbConn ) {
+          // Close connection once the pending operations are completed
+          dbConn.asyncClose({
+            complete: () => {
+              this.checkPref(newlist);
+              this.notifyPage();
+              //close setting page - start
+              let win = document.getElementById('bbsfoxOption');
+              win.cancelDialog();
+              //close setting page - end
+            }
+          });
+          dbConn = null;
+        }
+      }
+    };
+    let nsIFilePicker = Ci.nsIFilePicker;
+    let fp = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
     fp.init(window, null, nsIFilePicker.modeOpen);
     fp.appendFilter("SQLite", "*.sqlite");
     //if (fp.show() == fp.returnCancel || !fp.file) return false;
 
-    fp.open(function(result) {
+    fp.open(result => {
       if(result != fp.returnCancel && fp.file) {
 
         var strBundle = document.getElementById("bbsfoxoptions-string-bundle");
@@ -797,18 +826,15 @@ BBSFoxOptions.prototype = {
         if(!fp.file.exists()) return false;
 
         var dbSvc = Cc["@mozilla.org/storage/service;1"].getService(Ci.mozIStorageService);
-        var dbConn = dbSvc.openDatabase(fp.file);
-
-        var branch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).getBranch("extensions.bbsfox2.");
+        dbConn = dbSvc.openDatabase(fp.file);
         var nsIString = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
         var CiStr = Ci.nsISupportsString;
         var hostregex = /^hostlist_(.{1,})/i;
-        var newlist = [];
 
         var stmt = dbConn.createAsyncStatement("SELECT * FROM 'bbsfox_Setting_str_table'");
         try {
           stmt.executeAsync({
-            handleResult: function (aResultSet) {
+            handleResult: aResultSet => {
               var row;
               while (row = aResultSet.getNextRow()) {
                 var key = row.getResultByIndex(0);
@@ -816,8 +842,8 @@ BBSFoxOptions.prototype = {
                 branch.setComplexValue(key, Ci.nsISupportsString, nsIString);
               }
             },
-            handleError: function(){},
-            handleCompletion: function(){}
+            handleError: () => {handleCompletion();},
+            handleCompletion: () => {handleCompletion();}
           });
         }
         finally {stmt.finalize(); }
@@ -825,7 +851,7 @@ BBSFoxOptions.prototype = {
         stmt = dbConn.createAsyncStatement("SELECT * FROM 'bbsfox_Setting_int_table'");
         try {
           stmt.executeAsync({
-            handleResult: function (aResultSet) {
+            handleResult: aResultSet => {
               var row;
               while (row = aResultSet.getNextRow()) {
                 var key = row.getResultByIndex(0);
@@ -833,8 +859,8 @@ BBSFoxOptions.prototype = {
                 branch.setIntPref(key, value);
               }
             },
-            handleError: function(){},
-            handleCompletion: function(){}
+            handleError: () => {handleCompletion();},
+            handleCompletion: () => {handleCompletion();}
           });
         }
         finally {stmt.finalize(); }
@@ -842,7 +868,7 @@ BBSFoxOptions.prototype = {
         stmt = dbConn.createAsyncStatement("SELECT * FROM 'bbsfox_Setting_bool_table'");
         try {
           stmt.executeAsync({
-            handleResult: function (aResultSet) {
+            handleResult: aResultSet => {
               var row;
               while (row = aResultSet.getNextRow()) {
                 var key = row.getResultByIndex(0);
@@ -856,42 +882,17 @@ BBSFoxOptions.prototype = {
                 }
               }
             },
-            handleError: function(){},
-            handleCompletion: function(){}
+            handleError: () => {handleCompletion();},
+            handleCompletion: () => {handleCompletion();}
           });
         }
         finally {stmt.finalize(); }
-
-        //try to recover background picture - start
-        var allAddrList = this.browserutils.getSiteAddrList();
-        for(var i=0;i<allAddrList.length;++i)
-          this.recoverbgfile(branch, dbConn, allAddrList[i]);
-        this.recoverbgfile(branch, dbConn, "default");
-        //try to recover background picture - end
-
-        var _this = this;
-        if(dbConn )
-        {
-          // Close connection once the pending operations are completed
-          dbConn.asyncClose({
-            complete: function() {
-              _this.checkPref(newlist);
-              _this.notifyPage();
-              //close setting page - start
-              var win = document.getElementById('bbsfoxOption');
-              win.cancelDialog();
-              //close setting page - end
-            }
-          });
-          dbConn = null;
-        }
       }
-    }.bind(this));
+    });
     return true;
   },
 
   recoverbgfile: function(branch, dbConn, site) {
-    var _this = this;
     var CiStr = Ci.nsISupportsString;
     var type = branch.getIntPref("host_"+site+".BackgroundType");
     if(type!=0)
@@ -905,7 +906,7 @@ BBSFoxOptions.prototype = {
         //var data = { value: null };
         try {
           stmt.executeAsync({
-            handleResult: function (aResultSet) {
+            handleResult: aResultSet => {
               var row;
               while (row = aResultSet.getNextRow()) {
                 var key = row.getResultByIndex(0);
@@ -914,7 +915,7 @@ BBSFoxOptions.prototype = {
                   if(value.length) {
                     var dir = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties);
                     var file = dir.get("ProfD", Ci.nsIFile);
-                    var site2 = (site == 'default') ? site : _this.getFullUrl(site);
+                    var site2 = (site == 'default') ? site : this.getFullUrl(site);
                     site2 = site2.replace(/:/g, '~');
                     file.append("bbsfoxBg");
                     if (!file.exists() || !file.isDirectory()) {
@@ -950,12 +951,10 @@ BBSFoxOptions.prototype = {
 
   getFullUrl: function(siteaddr) {
     var splits = siteaddr.split(/:/g);
-    if(splits.length == 1)
-    {
+    if(splits.length == 1) {
       return siteaddr+':23';
     }
-    else if(splits.length == 2)
-    {
+    else if(splits.length == 2) {
       return siteaddr;
     }
   },
@@ -1116,7 +1115,7 @@ function onSelectBGImage()
   fp.appendFilters(nsIFilePicker.filterImages);
   //if (fp.show() == nsIFilePicker.returnCancel) return;
 
-  fp.open(function(result) {
+  fp.open( result => {
     if(result != fp.returnCancel && fp.file) {
 
       if(!fp.file.exists()) return;
@@ -1156,7 +1155,7 @@ function onSelectBGImage()
       textEdit.value = s;
       istream.close();
     }
-  }.bind(this));
+  });
 }
 
 function onSelectPrivateKey()

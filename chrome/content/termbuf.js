@@ -1464,9 +1464,8 @@ TermBuf.prototype={
                       line[i].needUpdate = true;
                     this.updateCharAttr();
                     this.view.update(false);
-                    var _this = this;
-                    this.view.setHighlightTimeout(function(){
-                      _this.clearHighlight();
+                    this.view.setHighlightTimeout(() => {
+                      this.clearHighlight();
                     });
                   }
                   //document.getElementById('testdata4').innerHTML = "hightlight = "+trow;

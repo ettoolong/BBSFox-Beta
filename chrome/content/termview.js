@@ -104,8 +104,7 @@ function TermView(colCount, rowCount) {
     }
     //init view - end
 
-    var _this=this;
-    this.blinkTimeout = setTimer(true, function(){_this.onBlink();}, 1000); //500
+    this.blinkTimeout = setTimer(true, () => {this.onBlink();}, 1000); //500
 
     this.highlightTimeout = null;
     this.highlighter = new Highlighter(this);
@@ -916,7 +915,7 @@ TermView.prototype={
       this.mainDisplay.style.overflow = 'hidden';
       this.mainDisplay.style.textAlign = 'left';
       this.mainDisplay.style.width = this.chw*this.buf.cols + 'px';
-      for(var i=0;i<this.buf.rows;++i)
+      for(let i=0;i<this.buf.rows;++i)
         this.BBSROW[i].style.width=this.chw*this.buf.cols + 'px';
 
       if(this.prefs.verticalAlignCenter && this.chh*this.buf.rows < document.documentElement.clientHeight)
@@ -960,7 +959,7 @@ TermView.prototype={
       }
       this.cursorDiv.style.transform = this.mainDisplay.style.transform;
       this.bbsCursor.style.width = this.chw + 'px';
-      var curHeight = Math.floor(this.chh/6);
+      let curHeight = Math.floor(this.chh/6);
       if(curHeight<2) curHeight = 2;
       this.bbsCursor.style.height = curHeight + 'px';
 
@@ -968,32 +967,35 @@ TermView.prototype={
     },
 
     convertMN2XY: function (cx, cy){
-      var origin = [this.firstGrid.offsetLeft, 0];
-      if(this.scaleX==1 && this.scaleY==1){
-        origin[1] = this.firstGrid.offsetTop;
-      }
+      let {x, y} = { x: this.firstGrid.offsetLeft,
+                     y: (this.scaleX==1 && this.scaleY==1) ? this.firstGrid.offsetTop : 0
+                   };
 
-      var realX = origin[0] + (cx * this.chw);
-      var realY = origin[1] + (cy * this.chh);
-      return [realX, realY];
+      let realX = x + (cx * this.chw);
+      let realY = y + (cy * this.chh);
+      return {x: realX, y: realY};
     },
 
     convertMN2XYEx: function (cx, cy){
-      var origin;
-      if(this.prefs.horizontalAlignCenter && this.scaleX!=1)
-        origin = [((document.documentElement.clientWidth - (this.chw*this.buf.cols)*this.scaleX)/2), this.firstGrid.offsetTop];
-      else
-        origin = [this.firstGrid.offsetLeft, this.firstGrid.offsetTop];
-      var realX = origin[0] + (cx * this.chw) * this.scaleX;
-      var realY = origin[1] + (cy * this.chh) + 1 + parseInt(this.mainDisplay.style.marginTop, 10);
-      return [realX, realY];
+      let x, y;
+      if(this.prefs.horizontalAlignCenter && this.scaleX!=1) {
+        x = ((document.documentElement.clientWidth - (this.chw*this.buf.cols)*this.scaleX)/2);
+        y = this.firstGrid.offsetTop;
+      }
+      else {
+        x = this.firstGrid.offsetLeft;
+        y = this.firstGrid.offsetTop;
+      }
+      let realX = x + (cx * this.chw * this.scaleX);
+      let realY = y + (cy * this.chh * this.scaleY);
+      return {x: realX, y: realY};
     },
 
     checkLeftDB: function(){
       if(this.prefs.dbcsDetect && this.buf.cur_x>1){
-        var lines = this.buf.lines;
-        var line = lines[this.buf.cur_y];
-        var ch = line[this.buf.cur_x-2];
+        let lines = this.buf.lines;
+        let line = lines[this.buf.cur_y];
+        let ch = line[this.buf.cur_x-2];
         if(ch.isLeadByte)
           return true;
       }
@@ -1002,9 +1004,9 @@ TermView.prototype={
 
     checkCurDB: function(){
       if(this.prefs.dbcsDetect){// && this.buf.cur_x<this.buf.cols-2){
-        var lines = this.buf.lines;
-        var line = lines[this.buf.cur_y];
-        var ch = line[this.buf.cur_x];
+        let lines = this.buf.lines;
+        let line = lines[this.buf.cur_y];
+        let ch = line[this.buf.cur_x];
         if(ch.isLeadByte)
           return true;
       }
@@ -1013,18 +1015,18 @@ TermView.prototype={
 
     // Cursor
     updateCursorPos: function(){
-      var pos = this.convertMN2XY(this.buf.cur_x, this.buf.cur_y);
+      let {x, y} = this.convertMN2XY(this.buf.cur_x, this.buf.cur_y);
       if(this.buf.cur_y>=this.buf.rows || this.buf.cur_x>=this.buf.cols)
         return; //sometimes, the value of this.buf.cur_x is 80 :(
 
-      var lines = this.buf.lines;
-      var line = lines[this.buf.cur_y];
-      var ch = line[this.buf.cur_x];
-      var bg = ch.getBg();
+      let lines = this.buf.lines;
+      let line = lines[this.buf.cur_y];
+      let ch = line[this.buf.cur_x];
+      let bg = ch.getBg();
 
-      this.bbsCursor.style.left = pos[0] + 'px';
-      var h = this.chh - parseInt(this.bbsCursor.style.height);
-      this.bbsCursor.style.top = pos[1] + h + 'px';
+      this.bbsCursor.style.left = x + 'px';
+      let h = this.chh - parseInt(this.bbsCursor.style.height);
+      this.bbsCursor.style.top = y + h + 'px';
 
       // if you want to set cursor color by now background, use this.
       this.bbsCursor.setAttribute('cr', 'Iq'+bg);
@@ -1034,24 +1036,27 @@ TermView.prototype={
     updateInputBufferPos: function() {
       if(this.compositionStart)
       {
-        var pos = this.convertMN2XYEx(this.buf.cur_x, this.buf.cur_y);
+        let inputBufferHeight = this.chh * this.scaleY;
+        let {x, y} = this.convertMN2XYEx(this.buf.cur_x, this.buf.cur_y);
         if(!this.prefs.hideInputBuffer)
         {
           this.input.style.opacity = '1';
           this.input.style.border = 'double';
           if(this.prefs.inputBufferSizeType==0)
           {
+            inputBufferHeight = this.chh;
             this.input.style.width  = (this.chh-4)*10 + 'px';
             this.input.style.fontSize = this.chh-4 + 'px';
             //this.input.style.lineHeight = this.chh+4 + 'px';
-            this.input.style.height = this.chh + 'px';
+            this.input.style.height = inputBufferHeight + 'px';
           }
           else
           {
-            this.input.style.width  = ((this.prefs.defineInputBufferSize*2)-4)*10 + 'px';
-            this.input.style.fontSize = ((this.prefs.defineInputBufferSize*2)-4) + 'px';
+            inputBufferHeight = this.prefs.defineInputBufferSize*2;
+            this.input.style.width  = (inputBufferHeight-4)*10 + 'px';
+            this.input.style.fontSize = (inputBufferHeight-4) + 'px';
             //this.input.style.lineHeight = this.bbscore.inputBufferSize*2+4 + 'px';
-            this.input.style.height = this.prefs.defineInputBufferSize*2 + 'px';
+            this.input.style.height = inputBufferHeight + 'px';
           }
         }
         else
@@ -1063,28 +1068,22 @@ TermView.prototype={
           this.input.style.opacity = '0';
           //this.input.style.left = '-100000px';
         }
-        var bbswinheight = parseFloat(this.BBSWin.style.height);
-        var bbswinwidth = parseFloat(this.BBSWin.style.width);
-        if(bbswinheight < pos[1] + parseFloat(this.input.style.height) + this.chh)
-          this.input.style.top = (pos[1] - parseFloat(this.input.style.height) - this.chh)+ 4 +'px';
-        else
-          this.input.style.top = (pos[1] + this.chh) +'px';
+        let bbswinheight = parseFloat(this.BBSWin.style.height);
+        let bbswinwidth = parseFloat(this.BBSWin.style.width);
+        if(bbswinheight < y + inputBufferHeight + 10 + (this.chh * this.scaleY) ) {
+          this.input.style.top = (y - inputBufferHeight - 8) + 'px';
+        }
+        else {
+          this.input.style.top = (y + (this.chh * this.scaleY) + 1) +'px';
+        }
 
-        if(bbswinwidth < pos[0] + parseFloat(this.input.style.width))
+        if(bbswinwidth < x + parseFloat(this.input.style.width)) {
           this.input.style.left = bbswinwidth - parseFloat(this.input.style.width)- 10 +'px';
-        else
-          this.input.style.left = pos[0] +'px';
-
-        //this.input.style.left = pos[0] +'px';
+        }
+        else {
+          this.input.style.left = x +'px';
+        }
       }
-      //fix input buffer pos - start
-      //else
-      //{
-      //  var pos = this.convertMN2XY(this.buf.cur_x, this.buf.cur_y);
-      //  this.input.style.top = (pos[1] + this.chh) +'px';
-      //  this.input.style.left = pos[0] +'px';
-      //}
-      //fix input buffer pos - end
     },
 
     composition_start: function(e) {
@@ -1359,7 +1358,7 @@ TermView.prototype={
     setSpaceCharacter: function(){
       this.spaceCharacterElem.style.fontSize = '64px';
       this.nbspCharacterElem.style.fontSize = '64px';
-      var spaceCharacter = this.spaceCharacterElem.offsetWidth == this.nbspCharacterElem.offsetWidth ? '&nbsp;' : '\u0020';
+      let spaceCharacter = this.spaceCharacterElem.offsetWidth == this.nbspCharacterElem.offsetWidth ? '&nbsp;' : '\u0020';
       if(this.spaceCharacter != spaceCharacter) {
         this.spaceCharacter = spaceCharacter;
         this.update(true);
@@ -1367,21 +1366,19 @@ TermView.prototype={
     },
 
     cancelHighlightTimeout: function() {
-      if(this.highlightTimeout)
-      {
+      if(this.highlightTimeout) {
         this.highlightTimeout.cancel();
-        this.highlightTimeout=null;
+        this.highlightTimeout = null;
       }
     },
 
     setHighlightTimeout: function(cb) {
       this.cancelHighlightTimeout();
-      var _this=this;
-      var func=function() {
-        _this.highlightTimeout=null;
-        cb();
+      if(this.prefs.mouseBrowsingHlTime) {
+        this.highlightTimeout = setTimer(false,() => {
+          this.highlightTimeout = null;
+          cb();
+        }, this.prefs.mouseBrowsingHlTime);
       }
-      if(this.prefs.mouseBrowsingHlTime)
-        this.highlightTimeout = setTimer(false, func, this.prefs.mouseBrowsingHlTime);
     }
 };

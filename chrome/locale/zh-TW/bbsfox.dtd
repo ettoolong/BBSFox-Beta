@@ -251,6 +251,7 @@
 <!ENTITY options_hidebookmarklinkmenu.label "在BBS視窗隱藏快顯功能表 [此鍵結加入書籤] 項目">
 <!ENTITY options_hidesendlinkmenu.label "在BBS視窗隱藏滑鼠快顯功能表 [郵寄此鍵結] 項目">
 <!ENTITY options_hidesendpagemenu.label "在BBS視窗隱藏快顯功能表 [郵寄網址] 項目">
+<!ENTITY options_hideviewsourcemenu.label "在BBS視窗隱藏快顯功能表 [檢視原始碼] 項目">
 <!ENTITY options_hideviewinfomenu.label "在BBS視窗隱藏快顯功能表 [檢視頁面資訊] 項目">
 <!ENTITY options_hideinspectmenu.label "在BBS視窗隱藏快顯功能表 [檢測元素] 項目">
 <!ENTITY options_downloadlinedelay.label "下載文章時每行間的延遲">

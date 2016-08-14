@@ -164,10 +164,12 @@ let bbstabs = {
         let logins = Cc["@mozilla.org/login-manager;1"].getService(Ci.nsILoginManager).findLogins({}, query.url, query.ds, null);
         if(logins.length) {
           result[query.protocol] = { userName: logins[0]["username"], password: logins[0]["password"] };
-        } else {
+        }
+        else {
           result[query.protocol] = { userName: '', password: '' };
         }
-      }catch(ex){
+      }
+      catch(ex){
         result[query.protocol] = { userName: '', password: '' };
       }
     }
@@ -179,19 +181,19 @@ let bbstabs = {
   },
 
   openEasyReadingTab: function(htmlData, target) {
-      let filetmp = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
-      filetmp.append("easyreading.htm");
-      filetmp.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0o666);
-      let ostream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-      ostream.init(filetmp, -1, -1, 0);
-      let converter = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
-      converter.init(ostream, "UTF-8", 0, 0);
-      converter.writeString(htmlData);
-      converter.flush();
-      converter.close();
-      let tempURI = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService).newFileURI(filetmp).spec;
-      this.openNewTabs([tempURI], null, "UTF-8", true);
-      bbstabs.tempFiles.push(filetmp);
+    let filetmp = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("TmpD", Ci.nsIFile);
+    filetmp.append("easyreading.htm");
+    filetmp.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0o666);
+    let ostream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+    ostream.init(filetmp, -1, -1, 0);
+    let converter = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
+    converter.init(ostream, "UTF-8", 0, 0);
+    converter.writeString(htmlData);
+    converter.flush();
+    converter.close();
+    let tempURI = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService).newFileURI(filetmp).spec;
+    this.openNewTabs([tempURI], null, "UTF-8", true);
+    bbstabs.tempFiles.push(filetmp);
   },
 
   pushThreadDlg: function(data, target) {
@@ -210,8 +212,7 @@ let bbstabs = {
                         temp:""
                       }, target);
     }
-    else
-    {
+    else {
       this.setBBSCmdEx({command:"sendPushThreadText",
                         temp: retVals.pushText
                       }, target);
@@ -298,14 +299,16 @@ let bbstabs = {
             converter.init(foStream, "UTF-8", 0, 0);
             converter.writeString(writeData);
             converter.close(); // this closes foStream
-          } else {
+          }
+          else {
             foStream.write(writeData, writeData.length);
             if (foStream instanceof Ci.nsISafeOutputStream)
               foStream.finish();
             else
               foStream.close();
           }
-        } else if(mode == nsIFilePicker.modeOpen) {
+        }
+        else if(mode == nsIFilePicker.modeOpen) {
           let fstream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
           // Read data with 2-color DBCS char
           fstream.init(fileChooser.file, -1, -1, false);
@@ -489,23 +492,25 @@ let bbstabs = {
         event.stopPropagation();
         event.preventDefault();
         //bbstabs.doDOMMouseScroll = false;
-      } else {
+      }
+      else {
         if(this.os == "winnt") {
           //do nothing...
-        } else if(bbstabs.mouseRBtnDown) {//if Linux or Mac, delay popup menu.
+        }
+        else if(bbstabs.mouseRBtnDown) {//if Linux or Mac, delay popup menu.
           event.stopPropagation();
           event.preventDefault();
           return;
         }
       }
-    } else {
     }
   },
 
   mouse_down: function (event) {
     if(event.button==2) {
       bbstabs.globalMouseRBtnDown = true;
-    } else if(event.button==0) {
+    }
+    else if(event.button==0) {
       bbstabs.globalMouseLBtnDown = true;
     }
 
@@ -518,7 +523,8 @@ let bbstabs = {
     if(event.button==2) {
       bbstabs.mouseRBtnDown = true;
       bbstabs.doDOMMouseScroll = false;
-    } else if(event.button==0) {
+    }
+    else if(event.button==0) {
       bbstabs.mouseLBtnDown = true;
     }
   },
@@ -527,7 +533,8 @@ let bbstabs = {
     if(event.button==2) {
       bbstabs.globalMouseRBtnDown = false;
       bbstabs.mouseRBtnDown = false;
-    } else if(event.button==0) {
+    }
+    else if(event.button==0) {
       bbstabs.globalMouseLBtnDown = false;
       bbstabs.mouseLBtnDown = false;
     }
@@ -546,8 +553,9 @@ let bbstabs = {
     if(mouseWheelFunc2) {
       if(event.button==2) {
         if(this.os == "winnt") {
-        //do nothing...
-        } else {//if Linux or Mac, show popup menu.
+          //do nothing...
+        }
+        else {//if Linux or Mac, show popup menu.
           if(!bbstabs.doDOMMouseScroll) {
             let browser = event.target.mCurrentBrowser;
             this.setBBSCmdEx({command:"contextmenu",
@@ -620,15 +628,18 @@ let bbstabs = {
             this.setBBSCmdEx({command:"sendCharCode", charCode:23}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==98 || event.charCode==66) && eventPrefs.hotkeyCtrlB == 1) {
+          }
+          else if((event.charCode==98 || event.charCode==66) && eventPrefs.hotkeyCtrlB == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:20}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==108 || event.charCode==76) && eventPrefs.hotkeyCtrlL == 1) {
+          }
+          else if((event.charCode==108 || event.charCode==76) && eventPrefs.hotkeyCtrlL == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:23}, browser);
             event.stopPropagation();
             event.preventDefault();
-          } else if((event.charCode==116 || event.charCode==84) && eventPrefs.hotkeyCtrlT == 1) {
+          }
+          else if((event.charCode==116 || event.charCode==84) && eventPrefs.hotkeyCtrlT == 1) {
             this.setBBSCmdEx({command:"sendCharCode", charCode:20}, browser);
             event.stopPropagation();
             event.preventDefault();
@@ -720,8 +731,13 @@ let bbstabs = {
           this.setItemVisible(doc, "context-sendpage", false);
           this.setItemVisible(doc, "context-sharepage", false);
         }
-        if(eventPrefs.hideViewInfo) {
+        if(eventPrefs.hideViewSource && eventPrefs.hideViewInfo) {
           this.setItemVisible(doc, "context-sep-viewsource", false);
+        }
+        if(eventPrefs.hideViewSource) {
+          this.setItemVisible(doc, "context-viewsource", false);
+        }
+        if(eventPrefs.hideViewInfo) {
           this.setItemVisible(doc, "context-viewinfo", false);
         }
         if(eventPrefs.hideInspect) {
@@ -1124,13 +1140,20 @@ exports.main = function (options, callbacks) {
   }
   // Init event listener - end
 
-  if (options.loadReason === "install" || options.loadReason === "startup") {
-    //TODO: set default pref value
+  if (options.loadReason === "install") {
+    //TODO: show user manual
+    tabs.open({
+      url: "chrome://bbsfox/locale/help.html"
+    });
   }
-  if (options.loadReason === "install" || options.loadReason === "upgrade") {
-    //TODO: show version info
-    //TODO: update pref value, remove unused pref
-  }
+
+  // if (options.loadReason === "install" || options.loadReason === "startup") {
+  //   //TODO: set default pref value
+  // }
+  // if (options.loadReason === "install" || options.loadReason === "upgrade") {
+  //   //TODO: show version info
+  //   //TODO: update pref value, remove unused pref
+  // }
 
   aboutPage = new bbsfoxAbout.Page();
   bbsfoxBg.mount();

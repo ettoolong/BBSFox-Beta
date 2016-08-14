@@ -693,8 +693,8 @@
                               <checkbox id="SwitchBgDisplayMenu" label="&options_switchbgdisplaymenu.label;" bbsfoxDefaultValue="false"/>
                               <checkbox id="OpenAllLinkMenu" label="&options_openalllinkmenu.label;" bbsfoxDefaultValue="false"/>
                               <checkbox id="CopyHtmlMenu" label="&options_copyhtmlmenu.label;" disabled="true" hidden="true" bbsfoxDefaultValue="false"/>
-                              <checkbox id="ScreenKeyboardMenu" label="&options_screenkeyboardmenu.label;" bbsfoxDefaultValue="true"/>
-                              <checkbox id="AnsiColorToolMenu" label="&options_ansicolortoolmenu.label;" bbsfoxDefaultValue="true"/>
+                              <checkbox id="ScreenKeyboardMenu" label="&options_screenkeyboardmenu.label;" bbsfoxDefaultValue="false"/>
+                              <checkbox id="AnsiColorToolMenu" label="&options_ansicolortoolmenu.label;" bbsfoxDefaultValue="false"/>
                               <checkbox id="KeyWordTrackMenu" label="&options_keywordtrackmenu.label;" bbsfoxDefaultValue="false"/>
                               <checkbox id="DelayPasteMenu" label="&options_delaypastemenu.label;" bbsfoxDefaultValue="false" hidden="true"/>
                               <checkbox id="EasyReadingMenu" label="&options_easyreadingmenu.label;" bbsfoxDefaultValue="false"/>
@@ -719,6 +719,7 @@
                               <checkbox id="HideBookMarkLinkMenu" label="&options_hidebookmarklinkmenu.label;" bbsfoxDefaultValue="true"/>
                               <checkbox id="HideSendLinkMenu" label="&options_hidesendlinkmenu.label;" bbsfoxDefaultValue="true"/>
                               <checkbox id="HideSendPageMenu" label="&options_hidesendpagemenu.label;" bbsfoxDefaultValue="true"/>
+                              <checkbox id="HideViewSourceMenu" label="&options_hideviewsourcemenu.label;" bbsfoxDefaultValue="true"/>
                               <checkbox id="HideViewInfoMenu" label="&options_hideviewinfomenu.label;" bbsfoxDefaultValue="true"/>
                               <checkbox id="HideInspectMenu" label="&options_hideinspectmenu.label;" bbsfoxDefaultValue="true"/>
                             </vbox>
