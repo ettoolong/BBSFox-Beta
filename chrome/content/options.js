@@ -28,12 +28,12 @@ BBSFoxSiteSetting.prototype = {
     this.prefs.setBoolPref(prefName, this.values[elementId]);
   },
 
-  getPrefInte: function(elementId, prefName) {
+  getPrefInt: function(elementId, prefName) {
     if(!prefName) prefName = elementId;
     this.values[elementId] = this.prefs.getIntPref(prefName);
   },
 
-  setPrefInte: function(elementId, prefName) {
+  setPrefInt: function(elementId, prefName) {
     if(!prefName) prefName = elementId;
     this.prefs.setIntPref(prefName, this.values[elementId]);
   },
@@ -59,11 +59,11 @@ BBSFoxSiteSetting.prototype = {
     document.getElementById(elementId).checked = this.values[elementId];
   },
 
-  getUiInte: function(elementId) {
+  getUiInt: function(elementId) {
     this.values[elementId] = document.getElementById(elementId).value;
   },
 
-  setUiInte: function(elementId) {
+  setUiInt: function(elementId) {
     document.getElementById(elementId).value = this.values[elementId];
   },
 
@@ -88,8 +88,8 @@ BBSFoxSiteSetting.prototype = {
       for(var i in opt.valueBool){
         this.getUiBool(opt.valueBool[i]);
       }
-      for(var i in opt.valueInte){
-        this.getUiInte(opt.valueInte[i]);
+      for(var i in opt.valueInt){
+        this.getUiInt(opt.valueInt[i]);
       }
       for(var i in opt.valueComp){
         this.getUiComp(opt.valueComp[i]);
@@ -104,8 +104,8 @@ BBSFoxSiteSetting.prototype = {
       for(var i in opt.valueBool){
         this.setUiBool(opt.valueBool[i]);
       }
-      for(var i in opt.valueInte){
-        this.setUiInte(opt.valueInte[i]);
+      for(var i in opt.valueInt){
+        this.setUiInt(opt.valueInt[i]);
       }
       for(var i in opt.valueComp){
         this.setUiComp(opt.valueComp[i]);
@@ -129,14 +129,14 @@ BBSFoxSiteSetting.prototype = {
           this.setPrefBool(opt.valueBool[i]);
         }
       }
-      for(var i in opt.valueInte){
+      for(var i in opt.valueInt){
         try{
-          this.getPrefInte(opt.valueInte[i]);
+          this.getPrefInt(opt.valueInt[i]);
         }
         catch(e){
           //read this pref from default...
-          this.values[opt.valueInte[i]] = defaultPref.getIntPref(opt.valueInte[i]);
-          this.setPrefInte(opt.valueInte[i]);
+          this.values[opt.valueInt[i]] = defaultPref.getIntPref(opt.valueInt[i]);
+          this.setPrefInt(opt.valueInt[i]);
         }
       }
       for(var i in opt.valueComp){
@@ -177,8 +177,8 @@ BBSFoxSiteSetting.prototype = {
       for(var i in opt.valueBool){
         this.setPrefBool(opt.valueBool[i]);
       }
-      for(var i in opt.valueInte){
-        this.setPrefInte(opt.valueInte[i]);
+      for(var i in opt.valueInt){
+        this.setPrefInt(opt.valueInt[i]);
       }
       for(var i in opt.valueComp){
         this.setPrefComp(opt.valueComp[i]);
@@ -266,7 +266,7 @@ function BBSFoxOptions() {
   input.close();
 
   this.valueBool = [];
-  this.valueInte = [];
+  this.valueInt = [];
   this.valueComp = [];
   for(let i in this.bbsfoxPrefs.sitePrefs) {
     let value = this.bbsfoxPrefs.sitePrefs[i];
@@ -274,7 +274,7 @@ function BBSFoxOptions() {
       this.valueBool.push(i);
     }
     else if( typeof value === 'number') {
-      this.valueInte.push(i);
+      this.valueInt.push(i);
     }
     else if( typeof value === 'string'){
       this.valueComp.push(i);
@@ -589,22 +589,6 @@ BBSFoxOptions.prototype = {
 
   setDefault: function() {
     //set all ui item to default value.
-    var item = null;
-    // for(var i in this.valueBool){
-    //   item = document.getElementById(this.valueBool[i]);
-    //   if(item)
-    //     item.checked = bbsfoxPrefs[i];//(item.getAttribute('bbsfoxDefaultValue')=='true');
-    // }
-    // for(var i in this.valueInte){
-    //   item = document.getElementById(this.valueInte[i]);
-    //   if(item)
-    //     item.value = bbsfoxPrefs[i];//item.getAttribute('bbsfoxDefaultValue');
-    // }
-    // for(var i in this.valueComp){
-    //   item = document.getElementById(this.valueComp[i]);
-    //   if(item)
-    //     item.value = bbsfoxPrefs[i];//item.getAttribute('bbsfoxDefaultValue');
-    // }
     for(let i in options.bbsfoxPrefs.sitePrefs) {
       let value = options.bbsfoxPrefs.sitePrefs[i];
       item = document.getElementById(i);

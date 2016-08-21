@@ -15,8 +15,8 @@ var addonBaseUrl = null;
 function unload() {
   //unload frame-script, unregister telnet protocol handler
   let globalMM = Cc["@mozilla.org/globalmessagemanager;1"].getService(Ci.nsIMessageBroadcaster);
-  globalMM.removeMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", exec);
   globalMM.removeDelayedFrameScript(addonBaseUrl + "data/js/frame-script.js");
+  globalMM.removeMessageListener("bbsfox@ettoolong:bbsfox-globalCommand", exec);
 }
 
 function exec(msg) {
