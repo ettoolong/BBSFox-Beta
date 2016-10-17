@@ -16,9 +16,6 @@ function BBSFox() {
     this.conn = new ConnectCore(this);
     this.view = new TermView(80, 24);
     this.buf = new TermBuf(80, 24);
-    this.playerMgr = new EmbeddedPlayerMgr(this);
-    //this.pptPicLoader = new BBSPPTPicLoader(this);
-    //this.imgurPicLoader = new BBSImgurPicLoader(this);
     this.extPicLoader = new ExtPicLoader(this);
     this.extPicLoader.setCallback("load", this.showPicPreview.bind(this) );
     this.extPicLoader.setCallback("locate", this.setPicLocation.bind(this) );
@@ -96,8 +93,8 @@ BBSFox.prototype={
             .createBundle("chrome://bbsfox/locale/bbsfox.properties"),
 
     youtubeRegEx: /(https?:\/\/(?:www|m)\.youtube\.com\/watch\?.*v=([A-Za-z0-9._%-]*)|https?:\/\/youtu\.be\/([A-Za-z0-9._%-]*))/i,
-    ustreamRegEx: /(http:\/\/www\.ustream\.tv\/(channel|channel-popup)\/([A-Za-z0-9._%-]*))/i,
-    urecordRegEx: /(http:\/\/www\.ustream\.tv\/recorded\/([0-9]{5,10}))/i,
+    twitchRegEx: /https:\/\/(?:www\.)twitch\.tv\//i,
+    vimeoRegEx: /https:\/\/vimeo\.com\/([0-9]{1,10})/i,
     PttRegEx: /^(?:(?:(?:bbs\.)?ptt(?:2|3)?\.cc)|(?:ptt(?:2|3)?\.twbbs\.org))$/i,
     //there are some problem: http://www.ustream.tv/xxx -> http://www.ustream.tv/channel/xxx
 
@@ -798,20 +795,20 @@ BBSFox.prototype={
     },
 
     updateTabIcon: function(aStatus) {
-      var icon = 'chrome://bbsfox/skin/logo/logo.png';
+      var icon = ICON_LOGO;
       switch (aStatus) {
         case 'connect':
-          icon =  'chrome://bbsfox/skin/state_icon/connect.png';
+          icon = ICON_CONNECT;
           this.setInputAreaFocus();
           break;
         case 'disconnect':
-          icon =  'chrome://bbsfox/skin/state_icon/disconnect.png';
+          icon = ICON_DISCONNECT;
           break;
         case 'newmessage':  // Not used yet
-          icon =  'chrome://bbsfox/skin/state_icon/connect.png';
+          icon = ICON_CONNECT;
           break;
         case 'connecting':  // Not used yet
-          icon =  'chrome://bbsfox/skin/state_icon/connecting.gif';
+          icon = ICON_CONNECTING;
         default:
       }
       this.prefs.status.tabIcon = icon;
@@ -828,17 +825,21 @@ BBSFox.prototype={
       //this.loadLoginData();
     },
 
-    setFrameScript: function(cb) {
+    setFrameScript: function(cb, init) {
       if(!this.FrameScriptCb) {
-        //Update Overlay Prefs and Event Prefs
-        this.FrameScriptCb = cb;
-        if(this.prefs) {
-          this.prefs.updateEventPrefs(); //force update
-          this.loadLoginData();
-        } else {
+        if(init) {
+          //Update Overlay Prefs and Event Prefs
+          this.FrameScriptCb = cb;
+          if(this.prefs) {
+            this.prefs.updateEventPrefs(); //force update
+            this.loadLoginData();
+          }
         }
         return true;
       } else {
+        if(this.FrameScriptCb !== cb) {
+          this.sendCoreCommand({command: "disableScript"});
+        }
         this.FrameScriptCb = cb;
         this.prefs.updateEventPrefs(); //force update
         this.sendCoreCommand({command: "updateTabIcon", icon: this.prefs.status.tabIcon});
@@ -1133,6 +1134,7 @@ BBSFox.prototype={
         }
         if(event.target && event.target.getAttribute("link")=='true') //TODO: check target type.
         {
+          var defaultAction = true;
           //try to find out ancher node and get boardName.
           //if boardName == current boardname, jump to other board
           if(this.prefs.aidAction!=0 && this.prefs.aidAction!=1) {
@@ -1159,10 +1161,19 @@ BBSFox.prototype={
                 this.conn.send(sendCode);
                 event.stopPropagation();
                 event.preventDefault();
+                defaultAction = false;
               }
             }
           } else if(this.prefs.aidAction==1 && this.prefs.loadURLInBG){
+              defaultAction = false;
               this.bgtab(event);
+          }
+          if(defaultAction){
+            if((this.os == 'Darwin' && event.metaKey) || (this.os != 'Darwin' && event.ctrlKey)) {
+              this.bgtab(event);
+            } else {
+              this.fgtab(event);
+            }
           }
           return;
         }
@@ -1320,23 +1331,7 @@ BBSFox.prototype={
       this.view.tempPicY = event.clientY;
       //if we draging window, pass all detect.
       var dW = null;
-      if(this.playerMgr && this.playerMgr.dragingWindow)
-      {
-        dW = this.playerMgr.dragingWindow;
-        if(this.CmdHandler.getAttribute("DragingWindow")=='1') {
-          dW.playerDiv.style.left = dW.tempCurX + (event.pageX - dW.offX) + 'px';
-          dW.playerDiv.style.top = dW.tempCurY + (event.pageY - dW.offY) + 'px';
-          event.preventDefault();
-          return;
-        }
-        else if(this.CmdHandler.getAttribute("DragingWindow")=='2') {
-          dW.playerDiv2.style.left = dW.tempCurX + (event.pageX - dW.offX) + 'px';
-          dW.playerDiv2.style.top = dW.tempCurY + (event.pageY - dW.offY) + 'px';
-          event.preventDefault();
-          return;
-        }
-      }
-      else if(this.picViewerMgr && this.picViewerMgr.dragingWindow)
+      if(this.picViewerMgr && this.picViewerMgr.dragingWindow)
       {
         dW = this.picViewerMgr.dragingWindow;
         dW.viewerDiv.style.left = dW.tempCurX + (event.pageX - dW.offX) + 'px';
@@ -1442,7 +1437,7 @@ BBSFox.prototype={
         while (this.view.picturePreview.firstChild) this.view.picturePreview.removeChild(this.view.picturePreview.firstChild);
         this.view.picturePreview.style.display = "none";
         this.view.pictureInfoLabel.style.display = "none";
-        this.view.picLoadingImage.src="chrome://bbsfox/skin/state_icon/connecting.gif";
+        this.view.picLoadingImage.src = ICON_CONNECTING;
         this.view.picturePreviewLoading.style.display = "block";
         this.CmdHandler.setAttribute('LastPicAddr', linkUrl);
         var image = document.createElement('img');
@@ -1533,25 +1528,10 @@ BBSFox.prototype={
           str = dt.getData("text/plain");
         if(this.prefs.epWhenDropLink)
         {
-          if(this.youtubeRegEx.test(str))
-          {
-            this.playerMgr.openYoutubeWindow(str);
+          if(this.youtubeRegEx.test(str) || this.twitchRegEx.test(str) || this.vimeoRegEx.test(str) ) {
             event.preventDefault();
             this.setDelayInputAreaFocus();
-            return;
-          }
-          else if(this.ustreamRegEx.test(str))
-          {
-            this.playerMgr.openUstreamWindow(str);
-            event.preventDefault();
-            this.setDelayInputAreaFocus();
-            return;
-          }
-          else if(this.urecordRegEx.test(str))
-          {
-            this.playerMgr.openUrecordWindow(str);
-            event.preventDefault();
-            this.setDelayInputAreaFocus();
+            this.sendCoreCommand({command: "popupVideoWindow", url: str});
             return;
           }
         }
@@ -1699,7 +1679,7 @@ BBSFox.prototype={
     picLoaderror: function(img) {
       if(this.view.pictureWindow.style.display == "block")
       {
-        this.view.picLoadingImage.src="chrome://bbsfox/skin/state_icon/error.png";
+        this.view.picLoadingImage.src = ICON_ERROR;
         this.view.picturePreviewLoading.style.display = "block";
         this.view.picturePreview.style.display = "none";
         this.view.tempIamgeWidth = 40;
@@ -1787,6 +1767,25 @@ BBSFox.prototype={
       }
     },
 
+    //workaround for this issue: https://bugzil.la/1256249
+    fgtab: function (event){
+      if(event.target && event.target.getAttribute("link")=='true') {
+        var aNode = event.target;
+        if(aNode.parentNode && aNode.parentNode.nodeName == 'A') {
+          aNode = aNode.parentNode;
+        } else if(aNode.parentNode && aNode.parentNode.parentNode && aNode.parentNode.parentNode.nodeName == 'A') {
+          aNode = aNode.parentNode.parentNode;
+        } else {
+          aNode = null;
+        }
+        if(aNode) {
+          this.sendCoreCommand({command: "openNewTabs", charset: this.prefs.charset, ref: null, loadInBg: false, urls:[aNode.href]}, true);
+          event.stopPropagation();
+          event.preventDefault();
+        }
+      }
+    },
+
     bgtab: function (event){
       if(this.prefs.loadURLInBG)
       {
@@ -1839,6 +1838,10 @@ BBSFox.prototype={
       if(this.isPTT()) {
         this.sendCoreCommand({command: "pushThreadDlg", pushText: this.pushTextTemp, lineLength: this.prefs.pushThreadLineLength});
       }
+    },
+
+    setFullScreen: function(){
+      document.getElementById('topwin').requestFullscreen();
     },
 
     sendPushThreadText: function(sendText, temp){

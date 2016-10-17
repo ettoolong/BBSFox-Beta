@@ -430,8 +430,8 @@ DownloadArticle.prototype={
       iframe.setAttribute("frameborder",0);
 
       var scrstr = "https://www.youtube.com/embed/"+code+"?hl=zh_TW&fs=1&rel=0&loop=0&autoplay=0";
-      iframe.setAttribute("width",vSizeArr[this.prefs.embeddedPlayerSize].w);
-      iframe.setAttribute("height",vSizeArr[this.prefs.embeddedPlayerSize].h);
+      iframe.setAttribute("width",vSizeArr[4].w);
+      iframe.setAttribute("height",vSizeArr[4].h);
       iframe.setAttribute("src",scrstr);
     }
 };

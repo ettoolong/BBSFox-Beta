@@ -34,7 +34,8 @@ function TermView(colCount, rowCount) {
     this.input = document.getElementById('t');
     this.input.setAttribute('BBSFoxInput', '0');
     this.input.setAttribute('BBSInputText', '');
-    //this.wordtest = document.getElementById('BBSFoxFontTest');
+    this.lineTest = document.getElementById('LineTest');
+    this.cursorTest = document.getElementById('CursorTest');
     this.spaceCharacterElem = document.getElementById('SpaceCharacterTest');
     this.nbspCharacterElem = document.getElementById('NbspCharacterTest');
     this.spaceCharacter = '&nbsp;';
@@ -61,6 +62,7 @@ function TermView(colCount, rowCount) {
     this.colorTable = 0;
     this.compositionStart = false;
     this.dp = new DOMParser();
+    this.cursorPosMapping = [];
 
     this.os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
 
@@ -747,16 +749,20 @@ TermView.prototype={
         var conn = this.conn;
         if(e.charCode){
             // Control characters
-            if(this.os=='Darwin')
-            {
+            if(this.os=='Darwin') {
               if(e.metaKey && !e.altKey && !e.shiftKey && (e.charCode == 61 || e.charCode == 45)) {
                 e.preventDefault();
                 e.stopPropagation();
                 return;
               }
+              if(e.metaKey && e.ctrlKey && e.altKey && !e.shiftKey && e.charCode == 102) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.bbscore.setFullScreen();
+                return;
+              }
             }
-            else
-            {
+            else {
               if(e.ctrlKey && !e.altKey && !e.shiftKey && (e.charCode == 61 || e.charCode == 45)) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -784,17 +790,19 @@ TermView.prototype={
                     return;
                 }
               }
-              if( e.charCode >= 65 && e.charCode <=90 ) { // A-Z
-                    conn.send( String.fromCharCode(e.charCode - 64) );
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
-              }
-              else if( e.charCode >= 97 && e.charCode <=122 ) { // a-z
-                    conn.send( String.fromCharCode(e.charCode - 96) );
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return;
+              if(this.os != 'Darwin' || !e.metaKey) {
+                if( e.charCode >= 65 && e.charCode <=90 ) { // A-Z
+                  conn.send( String.fromCharCode(e.charCode - 64) );
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                else if( e.charCode >= 97 && e.charCode <=122 ) { // a-z
+                  conn.send( String.fromCharCode(e.charCode - 96) );
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
               }
             }
         }
@@ -907,16 +915,45 @@ TermView.prototype={
         }
     },
 
-    setTermFontSize: function(cw, ch) {
+    buildCursorPosMapping: function() {
+      let cols = this.buf ? this.buf.cols : 80;
+      let newMapping = new Array(cols);
+      for(let i = 0; i < cols; ++i) {
+        if(this.prefs.dynamicRenderTest) {
+          let textNode = document.createTextNode("O".repeat(i));
+          if(this.cursorTest.firstChild)
+            this.cursorTest.replaceChild(textNode, this.cursorTest.firstChild);
+          else
+            this.cursorTest.appendChild(textNode);
+          newMapping[i] = this.cursorTest.offsetWidth;
+        }
+        else {
+          newMapping[i] = i * this.chw;
+        }
+      }
+      this.cursorPosMapping = newMapping;
+    },
+
+    setTermFontSize: function(cw, ch, renderWidth) {
       this.chw = cw;
       this.chh = ch;
+      this.lineTest.style.fontSize = this.chh + 'px';
+      this.cursorTest.style.fontSize = this.chh + 'px';
       this.mainDisplay.style.fontSize = this.chh + 'px';
       this.mainDisplay.style.lineHeight = this.chh + 'px';
       this.mainDisplay.style.overflow = 'hidden';
       this.mainDisplay.style.textAlign = 'left';
-      this.mainDisplay.style.width = this.chw*this.buf.cols + 'px';
+
+      if(renderWidth) {
+        //console.log('renderWidth = ' + renderWidth);
+        this.mainDisplay.style.width = renderWidth + 'px';
+      }
+      else {
+        this.mainDisplay.style.width = this.chw*this.buf.cols + 'px';
+      }
+
       for(let i=0;i<this.buf.rows;++i)
-        this.BBSROW[i].style.width=this.chw*this.buf.cols + 'px';
+        this.BBSROW[i].style.width = this.mainDisplay.style.width;
 
       if(this.prefs.verticalAlignCenter && this.chh*this.buf.rows < document.documentElement.clientHeight)
         this.mainDisplay.style.marginTop = ((document.documentElement.clientHeight-this.chh*this.buf.rows)/2) + 'px';
@@ -928,7 +965,12 @@ TermView.prototype={
         this.scaleY = 1;
       }
       else{
-        this.scaleX = Math.floor(document.documentElement.clientWidth / (this.chw*this.buf.cols) * 100)/100;
+        if(renderWidth) {
+          this.scaleX = Math.floor(document.documentElement.clientWidth / renderWidth * 100)/100;
+        }
+        else {
+          this.scaleX = Math.floor(document.documentElement.clientWidth / (this.chw*this.buf.cols) * 100)/100;
+        }
         this.scaleY = Math.floor(document.documentElement.clientHeight / (this.chh*this.buf.rows) * 100)/100;
       }
 
@@ -963,6 +1005,7 @@ TermView.prototype={
       if(curHeight<2) curHeight = 2;
       this.bbsCursor.style.height = curHeight + 'px';
 
+      this.buildCursorPosMapping();
       this.updateCursorPos();
     },
 
@@ -971,7 +1014,8 @@ TermView.prototype={
                      y: (this.scaleX==1 && this.scaleY==1) ? this.firstGrid.offsetTop : 0
                    };
 
-      let realX = x + (cx * this.chw);
+      //let realX = x + (cx * this.chw);
+      let realX = x + this.cursorPosMapping[cx];
       let realY = y + (cy * this.chh);
       return {x: realX, y: realY};
     },
@@ -979,14 +1023,18 @@ TermView.prototype={
     convertMN2XYEx: function (cx, cy){
       let x, y;
       if(this.prefs.horizontalAlignCenter && this.scaleX!=1) {
-        x = ((document.documentElement.clientWidth - (this.chw*this.buf.cols)*this.scaleX)/2);
+        let renderWidth = parseInt(this.mainDisplay.style.width);
+        x = ((document.documentElement.clientWidth - renderWidth*this.scaleX)/2);
+        //x = ((document.documentElement.clientWidth - (this.chw*this.buf.cols)*this.scaleX)/2);
         y = this.firstGrid.offsetTop;
       }
       else {
         x = this.firstGrid.offsetLeft;
         y = this.firstGrid.offsetTop;
       }
-      let realX = x + (cx * this.chw * this.scaleX);
+
+      //let realX = x + (cx * this.chw * this.scaleX);
+      let realX = x + this.cursorPosMapping[cx] * this.scaleX;
       let realY = y + (cy * this.chh * this.scaleY);
       return {x: realX, y: realY};
     },
@@ -1129,13 +1177,33 @@ TermView.prototype={
           ++i;
           nowchh = i*2;
           nowchw = i;
+          if(this.prefs.dynamicRenderTest) {
+            this.lineTest.style.fontSize = (i*2) + 'px';
+            let textNode = document.createTextNode("O".repeat(cols));
+            if(this.lineTest.firstChild)
+              this.lineTest.replaceChild(textNode, this.lineTest.firstChild);
+            else
+              this.lineTest.appendChild(textNode);
+            o_w = this.lineTest.offsetWidth;
+          }
+          else {
+            o_w = nowchw * cols;
+          }
           o_h = (nowchh) * rows;
-          o_w = nowchw * cols;
+
         }while(o_h <= height && o_w <= width);
         --i;
         nowchh = i*2;
         nowchw = i;
-        this.setTermFontSize(nowchw, nowchh);
+
+        if(this.prefs.dynamicRenderTest) {
+          this.lineTest.style.fontSize = (i*2) + 'px';
+          this.cursorTest.style.fontSize = (i*2) + 'px';
+          this.setTermFontSize(nowchw, nowchh, this.lineTest.offsetWidth);
+        }
+        else {
+          this.setTermFontSize(nowchw, nowchh);
+        }
       }
       else
       {
