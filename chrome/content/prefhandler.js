@@ -606,23 +606,26 @@ bbsfoxPrefHandler.prototype={
           _this.fileIoMenu = branch.getBoolPref(name);
           break;
         case "DownloadLineDelay":
-          _this.downloadLineDelay=branch.getIntPref(name);
+          _this.downloadLineDelay = branch.getIntPref(name);
           break;
         case "DownloadFullPost":
-          _this.downloadFullPost=branch.getBoolPref(name);
+          _this.downloadFullPost = branch.getBoolPref(name);
           break;
         case "SaveAfterDownload":
-          _this.saveAfterDownload=branch.getBoolPref(name);
+          _this.saveAfterDownload = branch.getBoolPref(name);
           break;
         case "EasyReadingWithImg":
-          _this.easyReadingWithImg=branch.getBoolPref(name);
+          _this.easyReadingWithImg = branch.getBoolPref(name);
           break;
         case "EasyReadingWithVideo":
-          _this.easyReadingWithVideo=branch.getBoolPref(name);
+          _this.easyReadingWithVideo = branch.getBoolPref(name);
           break;
         case "ScreenKeyboardAlpha":
           if(bbsCore.symbolinput)
             bbsCore.symbolinput.setWindowAlpha(branch.getIntPref(name));
+          break;
+        case "BlacklistAlpha":
+          bbsCore.view.setBlacklistAlpha(branch.getIntPref(name));
           break;
         case "EPWhenDropLink":
           _this.epWhenDropLink = branch.getBoolPref(name);

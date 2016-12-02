@@ -256,6 +256,8 @@
 <!ENTITY options_highlight.label "關鍵字">
 <!ENTITY options_blacklistid.label "黑名單">
 <!ENTITY options_enableblacklist.label "啟用黑名單">
+<!ENTITY options_blacklistalpha.label "透明度">
+<!ENTITY options_blacklistalpha2.label "(100 = 完全透明)">
 <!ENTITY options_needGrowl1.label "您可能需要安裝">
 <!ENTITY options_needGrowl2.label "Growl">
 <!ENTITY options_needGrowl3.label "才能使此功能正常使用">

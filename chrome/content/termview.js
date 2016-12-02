@@ -1383,35 +1383,42 @@ TermView.prototype={
         node.appendChild(tn);
     },
 
-    setColorDefine: function(index){
-      var setCSS = function(node, newcss){
-        var tn = document.createTextNode(newcss);
-        if(node.firstChild)
-          node.replaceChild(tn ,node.firstChild);
-        else
-          node.appendChild(tn);
-      };
+    setCSS: function(node, newcss) {
+      let tn = document.createTextNode(newcss);
+      if(node.firstChild)
+        node.replaceChild(tn ,node.firstChild);
+      else
+        node.appendChild(tn);
+    },
 
-      var getColorDefineElem = function(id) {
-        var elem = document.getElementById(id);
-        if(!elem) {
-          var firstNode = document.getElementById('ColorDefine1');
-          elem = document.createElement('style');
-          elem.setAttribute('id', id);
-          firstNode.parentNode.insertBefore(elem, firstNode);
-        }
-        return elem;
-      };
-      var colorDefine;
+    getColorDefineElem:  function(id) {
+      let elem = document.getElementById(id);
+      if(!elem) {
+        let firstNode = document.getElementById('ColorDefine1');
+        elem = document.createElement('style');
+        elem.setAttribute('id', id);
+        firstNode.parentNode.insertBefore(elem, firstNode);
+      }
+      return elem;
+    },
+
+    setColorDefine: function(index) {
+      let colorDefine;
       if(typeof index !== 'undefined') {
-        colorDefine = getColorDefineElem('ColorDefine' + (index+1));
-        setCSS(colorDefine, this.getColorDefineCSS(index));
+        colorDefine = this.getColorDefineElem('ColorDefine' + (index+1));
+        this.setCSS(colorDefine, this.getColorDefineCSS(index));
       } else {
         for(var i=0;i<16;++i) {
-          colorDefine = getColorDefineElem('ColorDefine' + (i+1));
-          setCSS(colorDefine, this.getColorDefineCSS(i));
+          colorDefine = this.getColorDefineElem('ColorDefine' + (i+1));
+          this.setCSS(colorDefine, this.getColorDefineCSS(i));
         }
       }
+    },
+
+    setBlacklistAlpha: function(blacklistAlpha) {
+      let colorDefineElem = this.getColorDefineElem('BlacklistColor');
+      let colorDefineCSS = 'body {--blacklist:' + (blacklistAlpha == 0 ? "1" : ("0."+(100-blacklistAlpha))) + ';}';
+      this.setCSS(colorDefineElem, colorDefineCSS);
     },
 
     changeColorTable: function(){

@@ -186,7 +186,8 @@ let bbsfoxPage = {
     let xulTab = tabUtils.getTabForBrowser( target );
     let chromeWindow = tabUtils.getOwnerWindow(xulTab);
     let aDOMWindow = chromeWindow.QueryInterface(Ci.nsIInterfaceRequestor).getInterface(Ci.nsIDOMWindow);
-    aDOMWindow.PopupVideo_API.popupVideo(url);
+    if(aDOMWindow.PopupVideo_API)
+      aDOMWindow.PopupVideo_API.popupVideo(url);
   },
 
   playNotifySound: function(){

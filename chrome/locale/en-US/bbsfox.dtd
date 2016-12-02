@@ -256,6 +256,8 @@
 <!ENTITY options_highlight.label "Highlight">
 <!ENTITY options_blacklistid.label "Blacklist">
 <!ENTITY options_enableblacklist.label "Enable Blacklist">
+<!ENTITY options_blacklistalpha.label "Transparency">
+<!ENTITY options_blacklistalpha2.label "(100 = Transparent)">
 <!ENTITY options_needGrowl1.label "To use this function, You need install">
 <!ENTITY options_needGrowl2.label "Growl">
 <!ENTITY options_needGrowl3.label "">

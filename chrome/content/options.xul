@@ -826,7 +826,12 @@
                       <groupbox flex="1">
                         <caption label="&options_blacklistid.label;" id="blacklistid" hidden="true"/>
                         <vbox flex="1">
-                          <checkbox id="EnableBlacklist" label="&options_enableblacklist.label;"/>
+                          <hbox align="center">
+                            <checkbox id="EnableBlacklist" label="&options_enableblacklist.label;"/>
+                            <label control="BlacklistAlpha" value="&options_blacklistalpha.label;"/>
+                            <textbox id="BlacklistAlpha" size="3" type="number" min="50" max="100" increment="1" decimalplaces="0"/>
+                            <label control="BlacklistAlpha" value="&options_blacklistalpha2.label;"/>
+                          </hbox>
                           <textbox id="BlacklistedUserIds" multiline="true" flex="1"/>
                         </vbox>
                       </groupbox>

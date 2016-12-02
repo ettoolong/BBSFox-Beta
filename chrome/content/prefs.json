@@ -114,6 +114,7 @@
     "bbsbox.col": 80,
     "bbsbox.row": 24,
     "AidAction": 0,
+    "BlacklistAlpha": 80,
 
     "AntiIdle.string": "^[[A^[[B",
     "Escape.string": "^U",
