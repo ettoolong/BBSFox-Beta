@@ -8,7 +8,7 @@
   "author": "ettoolong@hotmail.com",
   "homepage": "https://addons.mozilla.org/zh-TW/firefox/user/ett-chung/",
   "engines": {
-    "firefox": "45.0 - 51.*"
+    "firefox": ">=51.0"
   },
   "license": "MIT",
   "keywords": [
