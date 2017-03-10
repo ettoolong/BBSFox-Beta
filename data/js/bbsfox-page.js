@@ -18,6 +18,7 @@ let tabUtils = require("sdk/tabs/utils");
 let winUtils = require("sdk/window/utils");
 
 let system = require("sdk/system");
+let { setTimeout } = require("sdk/timers");
 let notifications = require("sdk/notifications");
 let soundService = Cc["@mozilla.org/sound;1"].createInstance(Ci.nsISound);
 let { bbsfoxAPI, setAPICallback } = require("./bbsfox-api.js");
@@ -51,6 +52,7 @@ function BBSConnection (owner, worker, host, port, proxy) {
   // this._inputStream = null;
   // this.ipump = null;
   this.alive = true;
+  this.icon = ICON_LOGO;
   this.owner = owner;
   this.worker = worker;
   let proxyInfo = null;
@@ -72,13 +74,15 @@ BBSConnection.prototype = {
   ps: Cc["@mozilla.org/network/protocol-proxy-service;1"].getService(Ci.nsIProtocolProxyService),
 
   onStartRequest: function(req, ctx){
-    this.owner.updateTabIcon(ICON_CONNECT, this.worker);
+    this.icon = ICON_CONNECT;
+    this.updateStatus();
     this.worker.port.emit("bbsfox@ettoolong:bbsfox-connect", {});
   },
 
   onStopRequest: function(req, ctx, status){
     if(this.alive) {
-      this.owner.updateTabIcon(ICON_DISCONNECT, this.worker);
+      this.icon = ICON_DISCONNECT;
+      this.updateStatus();
       this.worker.port.emit("bbsfox@ettoolong:bbsfox-disconnect", {status: status});
     }
   },
@@ -93,7 +97,8 @@ BBSConnection.prototype = {
   },
 
   close: function() {
-    this.owner.updateTabIcon(ICON_DISCONNECT, this.worker);
+    this.icon = ICON_DISCONNECT;
+    this.updateStatus();
     this.alive = false;
     if(this._inputStream && this.inputStream && this.outputStream) {
       this._inputStream.close();
@@ -101,6 +106,10 @@ BBSConnection.prototype = {
       this.outputStream.close();
       this._inputStream = this.inputStream = this.outputStream = this.transport = null;
     }
+  },
+
+  updateStatus: function() {
+    this.owner.updateTabIcon(this.icon, this.worker);
   },
 
   send: function(str) {
@@ -209,6 +218,12 @@ let bbsfoxPage = {
           // addon sdk bug :(  see: https://bugzil.la/1259292
           if(!worker.tab) {
             this.rebuildWorkerMapping(worker);
+            setTimeout(() => {
+              let connection = this.getConnectionByWorker(worker);
+              if(connection) {
+                connection.conn.updateStatus();
+              }
+            }, 0);
           }
         });
         worker.on("detach", () => {
@@ -308,8 +323,9 @@ let bbsfoxPage = {
 
   updateTabIcon: function(icon, worker) {
     let xulTab = this.geXulTabBytWorker(worker);
-    if(xulTab)
+    if(xulTab) {
       xulTab.image = icon;
+    }
   },
 
   resetStatusBar: function(worker) {
