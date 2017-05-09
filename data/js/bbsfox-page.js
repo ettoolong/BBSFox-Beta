@@ -223,7 +223,7 @@ let bbsfoxPage = {
               if(connection) {
                 connection.conn.updateStatus();
               }
-            }, 0);
+            }, 1000);
           }
         });
         worker.on("detach", () => {
@@ -301,6 +301,12 @@ let bbsfoxPage = {
         break;
       case "popupVideoWindow":
         this.popupVideoWindow(data.url, message.worker);
+        break;
+      case "disconnect":
+        let connection = this.getConnectionByWorker(message.worker);
+        if(connection) {
+          connection.conn.close();
+        }
         break;
       default:
         break;
@@ -554,7 +560,7 @@ let bbsfoxPage = {
       if(!tab) {
         //console.log(commandSet);
       }
-      if(this.isBBSPage(tab.url)) { // telnet:// or ssh://
+      if(tab && this.isBBSPage(tab.url)) { // telnet:// or ssh://
         worker = this.getWorkerByTab(tab);
       }
     }
