@@ -98,7 +98,14 @@ function regAll() {
       // create dummy nsIURI and nsIChannel instances
       let ios = Cc[kIOSERVICE_CONTRACTID].getService(nsIIOService);
       let uri = ios.newURI("chrome://bbsfox/content/telnet.html", null, null);
-      return ios.newChannelFromURIWithLoadInfo(uri, aSecurity_or_aLoadInfo);
+      let ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
+      let sp = ssm.getSystemPrincipal();
+      return ios.newChannelFromURI2(uri,
+                                    null, //aLoadingNode
+                                    sp,   //aLoadingPrincipal
+                                    null, //aTriggeringPrincipal
+                                    Ci.nsILoadInfo.SEC_NORMAL,  //aSecurityFlags
+                                    Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
     }
   };
 
