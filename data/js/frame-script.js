@@ -94,18 +94,11 @@ function regAll() {
       return url.QueryInterface(nsIURI);
     },
 
-    newChannel: function(aURI, aSecurity_or_aLoadInfo) {
+    newChannel2: function(aURI, aSecurity_or_aLoadInfo) {
       // create dummy nsIURI and nsIChannel instances
       let ios = Cc[kIOSERVICE_CONTRACTID].getService(nsIIOService);
       let uri = ios.newURI("chrome://bbsfox/content/telnet.html", null, null);
-      let ssm = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager);
-      let sp = ssm.getSystemPrincipal();
-      return ios.newChannelFromURI2(uri,
-                                    null, //aLoadingNode
-                                    sp,   //aLoadingPrincipal
-                                    null, //aTriggeringPrincipal
-                                    Ci.nsILoadInfo.SEC_NORMAL,  //aSecurityFlags
-                                    Ci.nsIContentPolicy.TYPE_OTHER); //aContentPolicyType
+      return ios.newChannelFromURIWithLoadInfo(uri, aSecurity_or_aLoadInfo);
     }
   };
 
@@ -158,7 +151,7 @@ function regAll() {
       return cleanURI;
     },
 
-    newChannel: function(aURI, aSecurity_or_aLoadInfo) {
+    newChannel2: function(aURI, aSecurity_or_aLoadInfo) {
       // create dummy nsIURI and nsIChannel instances
       let ios = Cc[kIOSERVICE_CONTRACTID].getService(nsIIOService);
       let uri = ios.newURI("chrome://bbsfox/content/ssh.html", null, null);
